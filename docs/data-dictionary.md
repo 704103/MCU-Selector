@@ -34,6 +34,7 @@
 - 电气参数：供电范围、IO 电压和工作温度；
 - 封装资源：封装、引脚数和 GPIO 数量；
 - 常用外设：ADC、DAC、定时器、串口、SPI、I2C、CAN、USB 等；
+- 专项能力：TouchKey、LCD COM/SEG、音频、红外、按键扫描、0-Wait Flash、内部振荡器、复位方式、中断数量、内部运放和预驱方式；
 - 商务信息：样品价格、批量价格；
 - 数据来源：产品页、数据手册、核验日期和备注。
 
@@ -47,6 +48,8 @@
 - USB 汇总保留在 `usb`，Device、FS HOST/OTG、HS OTG 分别保存；
 - APM32 的 GPTMR、Advanced TMR、LPTMR 等与 STM32 的同语义定时器列合并；名称或功能不同的列新增独立字段；
 - APM32 的 `QSPI` 与 STM32 的 `M-SPI` 分开保存，避免把不同接口误合并。
+- `Touch Key`、`LCD COM`、`LCD SEG`、中断数量等明确为数量的列使用整数；音频、红外、按键扫描、0-Wait Flash、内部振荡器、内部运放使用布尔值；复位方式和预驱方式保留官方文本。
+- Holtek 8-bit 资料中的 `Program Memory (KW)` 不直接换算成 `flash_kb`；原始单位和待复核状态写入 `source_note`，避免把字数误当成字节容量。
 
 未出现在现有目录中的官方列，必须在 `schema.json`、导入脚本和网页列定义中同时增加，保证筛选、排序和 CSV 导出字段一致。
 

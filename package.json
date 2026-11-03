@@ -7,7 +7,8 @@
     "validate:data": "node scripts/validate-data.mjs",
     "generate:data": "node scripts/generate-data.mjs",
     "build:data": "npm run validate:data && npm run generate:data",
-    "import:official": "node scripts/import-official-data.mjs"
+    "import:official": "node scripts/import-official-data.mjs",
+    "import:official:batch": "node scripts/import-official-batch.mjs"
   },
   "dependencies": {
     "xlsx": "^0.18.5"

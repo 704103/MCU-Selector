@@ -1,0 +1,36 @@
+{
+  "manifest_version": "1.0.0",
+  "checked_at": "2026-11-03",
+  "policy": {
+    "row_granularity": "one exact orderable part number per row",
+    "merge_key": "manufacturer_id + part_number",
+    "pdf_intermediate": "Markdown generated with pdftotext before analysis",
+    "commit_size": "10 official files per batch"
+  },
+  "batches": [
+    {
+      "batch": 1,
+      "status": "imported",
+      "record_count": 552,
+      "review_status": "automated_mapping_complete_manual_review_pending",
+      "files": [
+        {"path": "官方数据/Artery_AT32_MCU_Cross_Reference_Table_EN_V202011.xlsx", "manufacturer": "artery", "parser": "artery-cross-reference", "format": "xlsx"},
+        {"path": "官方数据/Geehy_APM32A_Automotive_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
+        {"path": "官方数据/Geehy_APM32_Industrial_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
+        {"path": "官方数据/Geehy_G32A_Automotive_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
+        {"path": "官方数据/Geehy_G32R4_Encoder_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
+        {"path": "官方数据/Geehy_G32R_RealTime_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
+        {"path": "官方数据/Geehy_GW_Wireless_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
+        {"path": "官方数据/Holtek_32bit_MCU_Selection.xlsx", "manufacturer": "holtek", "parser": "holtek", "format": "xlsx"},
+        {"path": "官方数据/Holtek_8bit_MCU_Selection.xlsx", "manufacturer": "holtek", "parser": "holtek", "format": "xlsx"},
+        {"path": "官方数据/Nuvoton_32bit_KM103_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"}
+      ]
+    },
+    {"batch": 2, "status": "pending", "review_status": "not_started", "files": ["Nuvoton remaining selection guides", "Puya_PY32_Product_Selection.xls"]},
+    {"batch": 3, "status": "pending", "review_status": "not_started", "files": ["WCH_MCU_Selection.xlsx", "all nine PDF sources"]},
+    {"batch": 4, "status": "pending", "review_status": "not_started", "files": ["first ten HTML sources"]},
+    {"batch": 5, "status": "pending", "review_status": "not_started", "files": ["next ten HTML sources"]},
+    {"batch": 6, "status": "pending", "review_status": "not_started", "files": ["next ten HTML sources"]},
+    {"batch": 7, "status": "pending", "review_status": "not_started", "files": ["remaining eight HTML sources"]}
+  ]
+}

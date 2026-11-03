@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MCU 参数在线选型表，支持表头筛选、排序、分页和 CSV 导出。">
+  <meta name="description" content="MCU 在线选型工具，支持表头筛选、排序、分页和 CSV 导出。">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2317344c'/%3E%3C/svg%3E">
-  <title>MCU 在线选型表</title>
+  <title>MCU 在线选型工具</title>
   <style>
     :root {
       color-scheme: light;
@@ -116,7 +116,7 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="brand-line"><span class="brand-mark" aria-hidden="true">MCU</span><p class="eyebrow">在线参数目录</p></div>
-      <h1>MCU 在线选型表</h1>
+      <h1>MCU 在线选型工具</h1>
     </div>
   </header>
 
@@ -193,6 +193,7 @@
       { key: "flash_kb", title: "Flash（KB）", note: "程序存储容量", width: 112, kind: "enum", valueType: "number", get: (record) => record.flash_kb },
       { key: "sram_kb", title: "SRAM（KB）", note: "运行存储容量", width: 112, kind: "enum", valueType: "number", get: (record) => record.sram_kb },
       numberColumn("data_eeprom_bytes", "E2PROM（Bytes）", 102), booleanColumn("fpu", "FPU", 84),
+      numberColumn("touch_key_channel_count", "TouchKey", 86),
       { key: "voltage", title: "工作电压（V）", note: "VDD 最小值-最大值", width: 120, kind: "enum", valueType: "text", sortGet: (record) => record.vdd_min_v, get: voltageValue },
       { key: "temperature", title: "工作温度（°C）", note: "最小值-最大值", width: 120, kind: "enum", valueType: "text", sortGet: (record) => record.temperature_max_c, get: temperatureValue },
       { key: "package_variant", title: "封装", note: "封装型号", width: 132, kind: "enum", valueType: "text", get: (record) => record.package_variant || record.package },
@@ -224,6 +225,12 @@
       numberColumn("mdio_count", "MDIO"), numberColumn("dci_count", "DCI"), numberColumn("smc_count", "SMC"), numberColumn("dmc_count", "DMC"),
       { key: "ethernet", title: "Ethernet", note: "以太网接口", width: 82, kind: "enum", valueType: "boolean", get: (record) => record.ethernet },
       { key: "sdio", title: "SDIO", note: "SD 卡接口", width: 64, kind: "enum", valueType: "boolean", get: (record) => record.sdio },
+      numberColumn("lcd_com_count", "LCD COM", 78), numberColumn("lcd_seg_count", "LCD SEG", 78),
+      booleanColumn("audio", "音频"), booleanColumn("infrared", "红外"), booleanColumn("key_scan", "按键扫描"),
+      booleanColumn("zero_wait_flash", "0-Wait Flash", 96), booleanColumn("internal_oscillator", "内部振荡器", 96),
+      { key: "reset_method", title: "复位方式", note: "复位方式", width: 110, kind: "enum", valueType: "text", get: (record) => record.reset_method },
+      numberColumn("interrupt_source_count", "中断数量", 86), booleanColumn("internal_opamp", "内部运放", 86),
+      { key: "pre_driver_method", title: "预驱方式", note: "预驱方式", width: 112, kind: "enum", valueType: "text", get: (record) => record.pre_driver_method },
       booleanColumn("segment_lcd", "Segment LCD"), booleanColumn("jpeg_codec", "JPEG Codec"), booleanColumn("gpu", "GPU"), booleanColumn("gpu_3d", "3D GPU"),
       booleanColumn("tft_lcd", "TFT LCD"), booleanColumn("mipi_dsi", "MIPI_DSI"), numberColumn("sai_count", "SAI"),
       numberColumn("spdifrx_count", "SPDIFRX"), numberColumn("dfsdm_count", "DFSDM"), numberColumn("dcmi_count", "DCMI"), numberColumn("swpmi_count", "SWPMI"),

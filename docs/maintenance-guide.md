@@ -93,6 +93,18 @@ npm run build:data
 
 导入器会把 APM32 和 STM32 记录转换为 `data/source/mcus.csv`，同型号以官方表记录覆盖，旧表中官方文件未包含的型号保留。复合容量和接口数量会归一化为可筛选的数值，原始来源写入 `source_name` 和 `source_note`。重新导入时会保留已有的 `sample_price` 和 `batch_price`，避免技术资料更新覆盖商务报价。导入产生的重复型号会保留后出现的记录并输出警告，必须在合并前人工核对。
 
+其他厂商资料使用按批次的适配器导入：
+
+```text
+npm run import:official:batch -- 1
+npm run validate:data
+npm run generate:data
+```
+
+每批 10 份资料对应一个提交。导入器按 `manufacturer_id + part_number` 合并，保留已有 `mcu_id` 和价格；同型号来自多个官方表时，以最后读取的表为技术字段候选，并在终端输出重复警告。批次、解析器和审核状态记录在 `data/source/import-manifest.json`。
+
+PDF 资料先使用 `pdftotext` 生成 Markdown 中间文件，再使用 `pdftoppm` 渲染代表页检查表格布局；扫描型 PDF 只有在 OCR 后仍能确认型号级参数时才进入主表。不能从 PDF 确认到具体订货型号的家族总览只保留来源记录，不直接生成型号行。
+
 ## 9. 复核周期
 
 - 新增型号：合并前必须核验；

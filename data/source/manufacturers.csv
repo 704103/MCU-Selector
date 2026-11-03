@@ -1,3 +1,6 @@
 manufacturer_id,name,display_name,website_url,enabled
 st,STMicroelectronics,STMicroelectronics,https://www.st.com/,true
 geehy,Geehy Semiconductor,Geehy Semiconductor (APM32),https://www.geehy.com/,true
+artery,Artery Technology,Artery,https://www.arterytek.com/,true
+holtek,Holtek Semiconductor,Holtek,https://www.holtek.com/,true
+nuvoton,Nuvoton Technology,Nuvoton,https://www.nuvoton.com/,true
