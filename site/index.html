@@ -3,80 +3,743 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MCU 选型数据目录</title>
+  <meta name="description" content="MCU 参数在线选型表，支持筛选、分页和 CSV 导出。">
+  <link rel="icon" href="data:,">
+  <title>MCU 参数选型表</title>
   <style>
-    :root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #17212b; background: #f5f7f9; }
-    body { margin: 0; }
-    header { padding: 28px 5vw 22px; background: #17324d; color: white; }
-    header h1 { margin: 0 0 8px; font-size: clamp(1.45rem, 3vw, 2.15rem); }
-    header p { margin: 0; color: #d7e6f2; }
-    main { max-width: 1500px; margin: 0 auto; padding: 22px 5vw 48px; }
-    .controls { display: grid; grid-template-columns: minmax(240px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    label { display: grid; gap: 6px; font-size: .82rem; font-weight: 650; color: #44515d; }
-    input, select { width: 100%; box-sizing: border-box; min-height: 40px; padding: 8px 10px; border: 1px solid #bdc8d2; border-radius: 4px; background: white; color: inherit; font: inherit; }
-    .summary { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0; color: #53616d; font-size: .9rem; }
-    .table-wrap { overflow: auto; border: 1px solid #d5dde4; background: white; }
-    table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: .88rem; }
-    th, td { padding: 10px 12px; border-bottom: 1px solid #e3e8ec; text-align: left; white-space: nowrap; }
-    th { position: sticky; top: 0; z-index: 1; background: #edf2f6; color: #344553; font-weight: 700; }
-    tr:hover td { background: #f7fafc; }
-    a { color: #1261a0; }
-    .empty { padding: 28px; text-align: center; color: #687784; }
-    @media (max-width: 760px) { .controls { grid-template-columns: 1fr; } main { padding-inline: 3vw; } }
+    :root {
+      color-scheme: light;
+      --ink: #1b2733;
+      --muted: #667582;
+      --line: #d5dce2;
+      --line-strong: #bcc8d1;
+      --canvas: #f3f5f7;
+      --panel: #ffffff;
+      --blue-900: #17344c;
+      --blue-700: #2d6387;
+      --blue-100: #e9f1f5;
+      --orange: #e27a2f;
+      --orange-dark: #b75c1f;
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--canvas);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .site-header {
+      color: #fff;
+      background: var(--blue-900);
+      border-bottom: 4px solid var(--orange);
+    }
+
+    .header-inner {
+      max-width: 1660px;
+      margin: 0 auto;
+      padding: 22px 28px 20px;
+    }
+
+    .brand-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 32px;
+      color: var(--blue-900);
+      background: #fff;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: #b7d0df;
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 36px);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 22px;
+      margin: 0;
+      color: #d9e7ef;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1660px;
+      margin: 0 auto;
+      padding: 22px 28px 52px;
+    }
+
+    .filter-panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 1px 2px rgba(20, 45, 65, .05);
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafb;
+    }
+
+    .panel-heading h2 {
+      margin: 0;
+      color: var(--blue-900);
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .panel-heading span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .filter-form { padding: 16px; }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 2.2fr) repeat(4, minmax(145px, 1fr));
+      gap: 12px;
+    }
+
+    .filter-grid + .filter-grid { margin-top: 12px; }
+
+    .field {
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field label {
+      color: #4e5e6b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 36px;
+      padding: 7px 9px;
+      border: 1px solid var(--line-strong);
+      border-radius: 2px;
+      outline: 0;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--blue-700);
+      box-shadow: 0 0 0 2px rgba(45, 99, 135, .14);
+    }
+
+    .range-field { grid-column: span 2; }
+
+    .range-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .range-inputs input { min-width: 0; }
+
+    .filter-actions {
+      display: flex;
+      align-items: end;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .button {
+      min-height: 36px;
+      padding: 7px 14px;
+      border: 1px solid var(--blue-700);
+      border-radius: 2px;
+      color: #fff;
+      background: var(--blue-700);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .button:hover { background: var(--blue-900); }
+    .button.secondary { color: var(--blue-900); background: #fff; }
+    .button.secondary:hover { background: var(--blue-100); }
+
+    .table-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 22px 0 10px;
+    }
+
+    .table-heading h2 {
+      margin: 0 0 4px;
+      color: var(--blue-900);
+      font-size: 19px;
+    }
+
+    .table-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .table-actions { display: flex; gap: 8px; }
+
+    .table-shell {
+      overflow: auto;
+      max-height: min(68vh, 760px);
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      scrollbar-color: #a9b9c4 #edf1f3;
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 2240px;
+      border-collapse: separate;
+      border-spacing: 1px;
+      table-layout: fixed;
+      background: #d8e0e5;
+      font-size: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+      height: 34px;
+      padding: 6px 8px;
+      overflow: hidden;
+      border: 0;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .data-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      height: 42px;
+      color: #1d2e3b;
+      background: #e8eef2;
+      font-weight: 800;
+      line-height: 1.3;
+      white-space: normal;
+    }
+
+    .data-table tbody td { background: #fff; }
+    .data-table tbody tr:nth-child(even) td { background: #f8fafb; }
+    .data-table tbody tr:hover td { background: #fff3e9; }
+
+    .data-table .sticky-col {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      box-shadow: 2px 0 4px rgba(20, 45, 65, .12);
+    }
+
+    .data-table thead .sticky-col { z-index: 4; background: #dce6eb; }
+    .data-table tbody tr:nth-child(even) .sticky-col { background: #f8fafb; }
+    .data-table tbody tr:hover .sticky-col { background: #fff3e9; }
+
+    .part-number {
+      color: var(--blue-700);
+      font-weight: 800;
+      text-decoration: underline;
+      text-decoration-color: #a7bfce;
+      text-underline-offset: 2px;
+    }
+
+    .source-links { display: flex; gap: 7px; }
+    a { color: var(--blue-700); }
+    a:hover { color: var(--orange-dark); }
+
+    .boolean-yes { color: #267344; font-weight: 700; }
+    .boolean-no { color: #79858e; }
+    .unknown { color: #9aa5ac; }
+
+    .empty-state {
+      padding: 38px 16px;
+      color: var(--muted);
+      text-align: center;
+      background: #fff;
+    }
+
+    .status-bar,
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 12px 0;
+    }
+
+    .status-bar { color: var(--muted); font-size: 13px; }
+
+    .page-size {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #4e5e6b;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .page-size select {
+      min-height: 32px;
+      padding: 4px 8px;
+      border: 1px solid var(--line-strong);
+      border-radius: 2px;
+      background: #fff;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .page-button {
+      min-width: 32px;
+      height: 32px;
+      padding: 3px 8px;
+      border: 1px solid var(--line-strong);
+      border-radius: 2px;
+      color: var(--blue-700);
+      background: #fff;
+    }
+
+    .page-button:hover:not(:disabled),
+    .page-button[aria-current="page"] {
+      color: #fff;
+      border-color: var(--blue-700);
+      background: var(--blue-700);
+    }
+
+    .page-button:disabled { cursor: not-allowed; opacity: .45; }
+    .page-ellipsis { padding: 0 4px; color: var(--muted); }
+
+    .error-state {
+      padding: 18px;
+      border: 1px solid #e2b7a0;
+      color: #8c3c1b;
+      background: #fff5ef;
+    }
+
+    @media (max-width: 1100px) {
+      .filter-grid { grid-template-columns: repeat(3, minmax(145px, 1fr)); }
+      .filter-grid .keyword-field { grid-column: span 2; }
+      .range-field { grid-column: span 1; }
+      .filter-actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 700px) {
+      .header-inner, main { padding-right: 14px; padding-left: 14px; }
+      .panel-heading, .table-heading { align-items: flex-start; flex-direction: column; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .filter-grid .keyword-field,
+      .range-field { grid-column: auto; }
+      .filter-actions, .table-actions { width: 100%; }
+      .button { flex: 1; }
+      .table-heading { margin-top: 18px; }
+      .status-bar, .pagination-bar { align-items: flex-start; flex-direction: column; }
+      .pagination { flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>MCU 选型数据目录</h1>
-    <p>首批 STM32 型号数据，参数来源于 ST 官方产品页和数据手册。</p>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-line">
+        <span class="brand-mark" aria-hidden="true">MCU</span>
+        <p class="eyebrow">在线参数目录</p>
+      </div>
+      <h1>MCU 参数选型表</h1>
+      <p class="header-meta"><span>STM32 系列</span><span>型号级参数</span><span id="header-record-count">数据加载中...</span></p>
+    </div>
   </header>
+
   <main>
-    <section class="controls" aria-label="筛选条件">
-      <label>关键字<input id="search" type="search" placeholder="型号、系列、内核或封装"></label>
-      <label>系列<select id="family"><option value="">全部系列</option></select></label>
-      <label>内核<select id="core"><option value="">全部内核</option></select></label>
+    <section class="filter-panel" aria-labelledby="filter-title">
+      <div class="panel-heading">
+        <h2 id="filter-title">筛选条件</h2>
+        <span>参数范围使用“最小值”和“最大值”</span>
+      </div>
+      <form id="filter-form" class="filter-form">
+        <div class="filter-grid">
+          <div class="field keyword-field">
+            <label for="search">型号 / 关键词</label>
+            <input id="search" type="search" placeholder="型号、系列、内核、封装或描述">
+          </div>
+          <div class="field">
+            <label for="family">系列</label>
+            <select id="family"><option value="">全部系列</option></select>
+          </div>
+          <div class="field">
+            <label for="subfamily">子系列</label>
+            <select id="subfamily"><option value="">全部子系列</option></select>
+          </div>
+          <div class="field">
+            <label for="core">内核</label>
+            <select id="core"><option value="">全部内核</option></select>
+          </div>
+          <div class="field">
+            <label for="package">封装</label>
+            <select id="package"><option value="">全部封装</option></select>
+          </div>
+        </div>
+        <div class="filter-grid">
+          <div class="field range-field">
+            <label>主频（MHz）</label>
+            <div class="range-inputs"><input id="frequency-min" type="number" min="0" step="any" placeholder="最小值"><input id="frequency-max" type="number" min="0" step="any" placeholder="最大值"></div>
+          </div>
+          <div class="field range-field">
+            <label>Flash（KB）</label>
+            <div class="range-inputs"><input id="flash-min" type="number" min="0" step="1" placeholder="最小值"><input id="flash-max" type="number" min="0" step="1" placeholder="最大值"></div>
+          </div>
+          <div class="field range-field">
+            <label>SRAM（KB）</label>
+            <div class="range-inputs"><input id="sram-min" type="number" min="0" step="1" placeholder="最小值"><input id="sram-max" type="number" min="0" step="1" placeholder="最大值"></div>
+          </div>
+          <div class="field">
+            <label for="usb">USB</label>
+            <select id="usb"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
+          </div>
+          <div class="field">
+            <label for="can">CAN</label>
+            <select id="can"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
+          </div>
+        </div>
+        <div class="filter-grid">
+          <div class="field range-field">
+            <label>引脚数</label>
+            <div class="range-inputs"><input id="pins-min" type="number" min="0" step="1" placeholder="最小值"><input id="pins-max" type="number" min="0" step="1" placeholder="最大值"></div>
+          </div>
+          <div class="field">
+            <label for="ethernet">Ethernet</label>
+            <select id="ethernet"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
+          </div>
+          <div class="field">
+            <label for="sdio">SDIO</label>
+            <select id="sdio"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
+          </div>
+          <div class="field">
+            <label for="qspi">QSPI</label>
+            <select id="qspi"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
+          </div>
+          <div class="filter-actions">
+            <button class="button secondary" id="reset-filters" type="reset">清除筛选</button>
+          </div>
+        </div>
+      </form>
     </section>
-    <div class="summary" id="summary">正在加载数据...</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>型号</th><th>系列</th><th>内核</th><th>主频</th><th>Flash</th><th>SRAM</th><th>封装</th><th>引脚</th><th>GPIO</th><th>来源</th></tr></thead>
+
+    <div class="table-heading">
+      <div>
+        <h2>产品参数</h2>
+        <p id="summary">正在加载数据...</p>
+      </div>
+      <div class="table-actions">
+        <button class="button" id="export-csv" type="button">导出筛选结果</button>
+      </div>
+    </div>
+
+    <div id="load-error" class="error-state" hidden>数据加载失败，请检查发布目录中的生成文件。</div>
+    <div class="table-shell" id="table-shell">
+      <table class="data-table" aria-describedby="summary">
+        <colgroup>
+          <col style="width: 156px"><col style="width: 86px"><col style="width: 102px"><col style="width: 76px"><col style="width: 78px"><col style="width: 78px"><col style="width: 88px"><col style="width: 94px"><col style="width: 110px"><col style="width: 60px"><col style="width: 66px"><col style="width: 72px"><col style="width: 60px"><col style="width: 70px"><col style="width: 86px"><col style="width: 54px"><col style="width: 54px"><col style="width: 54px"><col style="width: 58px"><col style="width: 78px"><col style="width: 64px"><col style="width: 64px"><col style="width: 136px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="sticky-col" scope="col">产品型号</th><th scope="col">系列</th><th scope="col">内核</th><th scope="col">主频<br>MHz</th><th scope="col">Flash<br>KB</th><th scope="col">SRAM<br>KB</th><th scope="col">供电<br>V</th><th scope="col">工作温度<br>°C</th><th scope="col">封装</th><th scope="col">引脚</th><th scope="col">GPIO</th><th scope="col">ADC</th><th scope="col">DAC</th><th scope="col">定时器</th><th scope="col">UART / USART</th><th scope="col">SPI</th><th scope="col">I2C</th><th scope="col">CAN</th><th scope="col">USB</th><th scope="col">Ethernet</th><th scope="col">SDIO</th><th scope="col">QSPI</th><th scope="col">来源</th>
+          </tr>
+        </thead>
         <tbody id="rows"></tbody>
       </table>
-      <div class="empty" id="empty" hidden>没有符合条件的型号。</div>
+      <div id="empty" class="empty-state" hidden>没有符合条件的型号。</div>
+    </div>
+
+    <div class="status-bar">
+      <span id="result-range">-</span>
+      <span id="generated-at">数据生成时间：-</span>
+    </div>
+    <div class="pagination-bar">
+      <label class="page-size" for="page-size">每页显示
+        <select id="page-size"><option value="100" selected>100 条</option><option value="200">200 条</option><option value="500">500 条</option></select>
+      </label>
+      <nav aria-label="产品数据分页"><ol id="pagination" class="pagination"></ol></nav>
     </div>
   </main>
+
   <script>
-    const state = { catalog: [], metadata: {} };
+    const state = { catalog: [], metadata: {}, page: 1, pageSize: 100, filteredRecords: [] };
     const $ = (id) => document.getElementById(id);
-    const format = (value, unit) => value === null || value === undefined ? "-" : `${value}${unit}`;
+    const rangeFilters = [
+      ["frequency-min", "frequency-max", "max_frequency_mhz"],
+      ["flash-min", "flash-max", "flash_kb"],
+      ["sram-min", "sram-max", "sram_kb"],
+      ["pins-min", "pins-max", "pin_count"]
+    ];
+    const featureFilters = ["usb", "can", "ethernet", "sdio", "qspi"];
+    const exportColumns = [
+      ["产品型号", "part_number"], ["系列", "family"], ["子系列", "subfamily"], ["内核", "core"],
+      ["主频（MHz）", "max_frequency_mhz"], ["Flash（KB）", "flash_kb"], ["SRAM（KB）", "sram_kb"],
+      ["供电（V）", "voltage"], ["工作温度（°C）", "temperature"], ["封装", "package_variant"],
+      ["引脚数", "pin_count"], ["GPIO", "gpio_count"], ["ADC通道", "adc_channel_count"],
+      ["DAC通道", "dac_channel_count"], ["定时器", "timer_count"], ["UART/USART", "serial_count"],
+      ["SPI", "spi_count"], ["I2C", "i2c_count"], ["CAN", "can_count"], ["USB", "usb"],
+      ["Ethernet", "ethernet"], ["SDIO", "sdio"], ["QSPI", "qspi"], ["产品页", "product_url"], ["数据手册", "datasheet_url"]
+    ];
+
+    const uniqueSorted = (records, key) => [...new Set(records.map((record) => record[key]).filter((value) => value !== null && value !== undefined && value !== ""))]
+      .sort((a, b) => String(a).localeCompare(String(b), "zh-CN", { numeric: true }));
+
+    function escapeHTML(value) {
+      return String(value ?? "-").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
+    }
+
+    function safeURL(value) {
+      return /^https?:\/\//i.test(value || "") ? escapeHTML(value) : "#";
+    }
+
+    function formatValue(value, suffix = "") {
+      return value === null || value === undefined || value === "" ? "-" : `${escapeHTML(value)}${suffix}`;
+    }
+
+    function formatBoolean(value) {
+      if (value === true) return '<span class="boolean-yes">有</span>';
+      if (value === false) return '<span class="boolean-no">无</span>';
+      return '<span class="unknown">-</span>';
+    }
+
+    function formatVoltage(record) {
+      if (record.vdd_min_v === null || record.vdd_min_v === undefined || record.vdd_max_v === null || record.vdd_max_v === undefined) return "-";
+      return `${escapeHTML(record.vdd_min_v)}-${escapeHTML(record.vdd_max_v)}`;
+    }
+
+    function formatTemperature(record) {
+      if (record.temperature_min_c === null || record.temperature_min_c === undefined || record.temperature_max_c === null || record.temperature_max_c === undefined) return "-";
+      return `${escapeHTML(record.temperature_min_c)} to ${escapeHTML(record.temperature_max_c)}`;
+    }
+
+    function formatSerial(record) {
+      const values = [record.uart_count === null || record.uart_count === undefined ? null : `UART ${record.uart_count}`, record.usart_count === null || record.usart_count === undefined ? null : `USART ${record.usart_count}`].filter(Boolean);
+      return values.length ? values.map(escapeHTML).join(" / ") : "-";
+    }
 
     function fillOptions(id, values) {
+      const select = $(id);
       for (const value of values) {
         const option = document.createElement("option");
         option.value = value;
         option.textContent = value;
-        $(id).append(option);
+        select.append(option);
       }
     }
 
-    function render() {
-      const keyword = $("search").value.trim().toLowerCase();
-      const family = $("family").value;
-      const core = $("core").value;
-      const records = state.catalog.filter((record) => {
-        const text = [record.part_number, record.family, record.subfamily, record.description, record.manufacturer, record.core, record.package_variant].filter(Boolean).join(" ").toLowerCase();
-        return (!keyword || text.includes(keyword)) && (!family || record.family === family) && (!core || record.core === core);
-      });
-      $("rows").innerHTML = records.map((record) => `<tr><td><strong>${record.part_number}</strong></td><td>${record.family}</td><td>${record.core}</td><td>${format(record.max_frequency_mhz, " MHz")}</td><td>${format(record.flash_kb, " KB")}</td><td>${format(record.sram_kb, " KB")}</td><td>${record.package_variant || "-"}</td><td>${record.pin_count ?? "-"}</td><td>${record.gpio_count ?? "-"}</td><td><a href="${record.product_url}" target="_blank" rel="noreferrer">产品页</a> <a href="${record.datasheet_url}" target="_blank" rel="noreferrer">手册</a></td></tr>`).join("");
-      $("empty").hidden = records.length !== 0;
-      $("summary").textContent = `显示 ${records.length} / ${state.catalog.length} 个型号 | 数据生成时间：${state.metadata.generated_at ? new Date(state.metadata.generated_at).toLocaleString("zh-CN") : "-"}`;
+    function readNumber(id) {
+      const value = $(id).value.trim();
+      return value === "" ? null : Number(value);
     }
 
-    Promise.all([fetch("data/catalog.json").then((response) => response.json()), fetch("data/metadata.json").then((response) => response.json())])
-      .then(([catalog, metadata]) => { state.catalog = catalog; state.metadata = metadata; fillOptions("family", metadata.families); fillOptions("core", [...new Set(catalog.map((record) => record.core))].sort()); render(); })
-      .catch(() => { $("summary").textContent = "数据加载失败，请检查发布目录中的生成文件。"; });
+    function inRange(value, minimum, maximum) {
+      if (minimum === null && maximum === null) return true;
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return false;
+      return (minimum === null || Number(value) >= minimum) && (maximum === null || Number(value) <= maximum);
+    }
 
-    ["search", "family", "core"].forEach((id) => $(id).addEventListener("input", render));
+    function featureMatches(record, field) {
+      const expected = $(field).value;
+      if (!expected) return true;
+      if (expected === "unknown") return record[field] === null || record[field] === undefined;
+      return record[field] === (expected === "true");
+    }
+
+    function getFilteredRecords() {
+      const keyword = $("search").value.trim().toLowerCase();
+      const family = $("family").value;
+      const subfamily = $("subfamily").value;
+      const core = $("core").value;
+      const packageName = $("package").value;
+      const ranges = Object.fromEntries(rangeFilters.map(([minimumId, maximumId, field]) => [field, [readNumber(minimumId), readNumber(maximumId)]]));
+
+      return state.catalog.filter((record) => {
+        const keywordMatches = !keyword || record._searchText.includes(keyword);
+        const selectMatches = (!family || record.family === family) && (!subfamily || record.subfamily === subfamily) && (!core || record.core === core) && (!packageName || record.package === packageName);
+        const rangeMatches = Object.entries(ranges).every(([field, [minimum, maximum]]) => inRange(record[field], minimum, maximum));
+        const featureMatchesAll = featureFilters.every((field) => featureMatches(record, field));
+        return keywordMatches && selectMatches && rangeMatches && featureMatchesAll;
+      });
+    }
+
+    function renderRows(records) {
+      const start = (state.page - 1) * state.pageSize;
+      const visibleRecords = records.slice(start, start + state.pageSize);
+      $("rows").innerHTML = visibleRecords.map((record) => `<tr>
+        <td class="sticky-col" title="${escapeHTML(record.part_number)}"><a class="part-number" href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">${escapeHTML(record.part_number)}</a></td>
+        <td>${formatValue(record.family)}</td><td>${formatValue(record.core)}</td><td>${formatValue(record.max_frequency_mhz)}</td>
+        <td>${formatValue(record.flash_kb)}</td><td>${formatValue(record.sram_kb)}</td><td>${formatVoltage(record)}</td><td>${formatTemperature(record)}</td>
+        <td title="${escapeHTML(record.package_variant || record.package)}">${formatValue(record.package_variant || record.package)}</td><td>${formatValue(record.pin_count)}</td><td>${formatValue(record.gpio_count)}</td>
+        <td>${formatValue(record.adc_channel_count, record.adc_resolution_bits ? ` / ${record.adc_resolution_bits} bit` : "")}</td><td>${formatValue(record.dac_channel_count)}</td><td>${formatValue(record.timer_count)}</td>
+        <td>${formatSerial(record)}</td><td>${formatValue(record.spi_count)}</td><td>${formatValue(record.i2c_count)}</td><td>${formatValue(record.can_count)}</td>
+        <td>${formatBoolean(record.usb)}</td><td>${formatBoolean(record.ethernet)}</td><td>${formatBoolean(record.sdio)}</td><td>${formatBoolean(record.qspi)}</td>
+        <td class="source-links"><a href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">产品页</a><a href="${safeURL(record.datasheet_url)}" target="_blank" rel="noreferrer">手册</a></td>
+      </tr>`).join("");
+      $("empty").hidden = records.length !== 0;
+    }
+
+    function pageItems(totalPages) {
+      if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+      const items = [1];
+      const start = Math.max(2, state.page - 1);
+      const end = Math.min(totalPages - 1, state.page + 1);
+      if (start > 2) items.push("ellipsis-start");
+      for (let page = start; page <= end; page += 1) items.push(page);
+      if (end < totalPages - 1) items.push("ellipsis-end");
+      items.push(totalPages);
+      return items;
+    }
+
+    function renderPagination(totalPages) {
+      const pagination = $("pagination");
+      if (totalPages === 0) {
+        pagination.innerHTML = "";
+        return;
+      }
+      const items = [];
+      items.push(`<li><button class="page-button" type="button" data-page="${state.page - 1}" ${state.page === 1 ? "disabled" : ""}>上一页</button></li>`);
+      for (const item of pageItems(totalPages)) {
+        if (typeof item === "string") items.push(`<li class="page-ellipsis" aria-hidden="true">...</li>`);
+        else items.push(`<li><button class="page-button" type="button" data-page="${item}" ${item === state.page ? 'aria-current="page"' : ""}>${item}</button></li>`);
+      }
+      items.push(`<li><button class="page-button" type="button" data-page="${state.page + 1}" ${state.page === totalPages ? "disabled" : ""}>下一页</button></li>`);
+      pagination.innerHTML = items.join("");
+    }
+
+    function render() {
+      const records = getFilteredRecords();
+      state.filteredRecords = records;
+      const totalPages = Math.ceil(records.length / state.pageSize);
+      if (totalPages === 0) state.page = 1;
+      else if (state.page > totalPages) state.page = totalPages;
+      renderRows(records);
+      renderPagination(totalPages);
+      const start = records.length ? (state.page - 1) * state.pageSize + 1 : 0;
+      const end = records.length ? Math.min(state.page * state.pageSize, records.length) : 0;
+      $("summary").textContent = `筛选结果 ${records.length} / ${state.catalog.length} 个型号`;
+      $("result-range").textContent = records.length ? `当前显示 ${start}-${end} 条，共 ${totalPages} 页` : "当前没有可显示的型号";
+    }
+
+    function csvValue(value) {
+      const text = value === null || value === undefined ? "" : String(value);
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+
+    function exportValue(record, field) {
+      if (field === "voltage") return record.vdd_min_v === null || record.vdd_min_v === undefined || record.vdd_max_v === null || record.vdd_max_v === undefined ? "" : `${record.vdd_min_v}-${record.vdd_max_v}`;
+      if (field === "temperature") return record.temperature_min_c === null || record.temperature_min_c === undefined || record.temperature_max_c === null || record.temperature_max_c === undefined ? "" : `${record.temperature_min_c} to ${record.temperature_max_c}`;
+      if (field === "serial_count") return formatSerial(record).replace(/<[^>]+>/g, "");
+      return record[field] === null || record[field] === undefined ? "" : record[field];
+    }
+
+    function exportCSV() {
+      const header = exportColumns.map(([label]) => csvValue(label)).join(",");
+      const lines = state.filteredRecords.map((record) => exportColumns.map(([, field]) => csvValue(exportValue(record, field))).join(","));
+      const blob = new Blob([`\ufeff${[header, ...lines].join("\n")}`], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mcu-selection-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetAndRender() {
+      state.page = 1;
+      render();
+    }
+
+    let filterTimer;
+    function scheduleRender() {
+      window.clearTimeout(filterTimer);
+      filterTimer = window.setTimeout(resetAndRender, 100);
+    }
+
+    $("pagination").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-page]");
+      if (!button || button.disabled) return;
+      state.page = Number(button.dataset.page);
+      render();
+      $("table-shell").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    $("page-size").addEventListener("change", (event) => {
+      state.pageSize = Number(event.target.value);
+      state.page = 1;
+      render();
+    });
+    $("filter-form").addEventListener("submit", (event) => event.preventDefault());
+    $("filter-form").addEventListener("input", scheduleRender);
+    $("filter-form").addEventListener("change", resetAndRender);
+    $("reset-filters").addEventListener("click", () => window.setTimeout(resetAndRender, 0));
+    $("export-csv").addEventListener("click", exportCSV);
+
+    Promise.all([
+      fetch("data/catalog.json").then((response) => { if (!response.ok) throw new Error("catalog"); return response.json(); }),
+      fetch("data/metadata.json").then((response) => { if (!response.ok) throw new Error("metadata"); return response.json(); })
+    ]).then(([catalog, metadata]) => {
+      state.catalog = catalog.map((record) => ({
+        ...record,
+        _searchText: [record.part_number, record.family, record.subfamily, record.description, record.manufacturer, record.core, record.package, record.package_variant]
+          .filter(Boolean).join(" ").toLowerCase()
+      }));
+      state.metadata = metadata;
+      fillOptions("family", uniqueSorted(state.catalog, "family"));
+      fillOptions("subfamily", uniqueSorted(state.catalog, "subfamily"));
+      fillOptions("core", uniqueSorted(state.catalog, "core"));
+      fillOptions("package", uniqueSorted(state.catalog, "package"));
+      $("header-record-count").textContent = `${state.catalog.length} 个型号`;
+      $("generated-at").textContent = `数据生成时间：${metadata.generated_at ? new Date(metadata.generated_at).toLocaleString("zh-CN") : "-"}`;
+      render();
+    }).catch(() => {
+      $("summary").textContent = "数据加载失败";
+      $("load-error").hidden = false;
+      $("rows").innerHTML = "";
+      $("empty").hidden = true;
+      $("pagination").innerHTML = "";
+    });
   </script>
 </body>
 </html>
