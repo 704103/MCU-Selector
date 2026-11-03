@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0",
+  "row_granularity": "one exact orderable part number per row",
+  "primary_key": "mcu_id",
+  "source_of_truth": [
+    "data/source/manufacturers.csv",
+    "data/source/mcus.csv",
+    "data/source/mcu_features.csv",
+    "data/source/enums.json"
+  ],
+  "missing_value_policy": {
+    "empty": "not confirmed or not available",
+    "zero": "confirmed absent or count is zero",
+    "false": "confirmed that the feature is absent",
+    "true": "confirmed that the feature is present",
+    "forbidden_text_values": ["N/A", "n/a", "unknown", "Unknown", "none", "None"]
+  },
+  "tables": {
+    "manufacturers": {
+      "file": "manufacturers.csv",
+      "primary_key": "manufacturer_id",
+      "fields": {
+        "manufacturer_id": {"type": "string", "required": true, "description": "Stable lowercase identifier."},
+        "name": {"type": "string", "required": true, "description": "Official manufacturer name."},
+        "display_name": {"type": "string", "required": true, "description": "Name shown in the UI."},
+        "website_url": {"type": "url", "required": true, "description": "Manufacturer website."},
+        "enabled": {"type": "boolean", "required": true, "description": "Whether the manufacturer is shown in the UI."}
+      }
+    },
+    "mcus": {
+      "file": "mcus.csv",
+      "primary_key": "mcu_id",
+      "unique_keys": ["manufacturer_id + part_number"],
+      "fields": {
+        "mcu_id": {"type": "string", "required": true, "immutable": true, "description": "Stable internal identifier."},
+        "manufacturer_id": {"type": "reference", "required": true, "references": "manufacturers.manufacturer_id"},
+        "part_number": {"type": "string", "required": true, "description": "Full orderable part number."},
+        "family": {"type": "string", "required": true},
+        "subfamily": {"type": "string", "required": false},
+        "description": {"type": "string", "required": false},
+        "lifecycle_status": {"type": "enum", "required": true, "enum": "lifecycle_status"},
+        "record_status": {"type": "enum", "required": true, "enum": "record_status"},
+        "visibility": {"type": "enum", "required": true, "enum": "visibility"},
+        "architecture": {"type": "enum", "required": true, "enum": "architecture"},
+        "core": {"type": "string", "required": true},
+        "core_revision": {"type": "string", "required": false},
+        "max_frequency_mhz": {"type": "number", "required": true, "unit": "MHz", "minimum": 0},
+        "flash_kb": {"type": "integer", "required": true, "unit": "KB", "minimum": 0},
+        "sram_kb": {"type": "integer", "required": true, "unit": "KB", "minimum": 0},
+        "data_eeprom_kb": {"type": "integer", "required": false, "unit": "KB", "minimum": 0},
+        "backup_sram_kb": {"type": "integer", "required": false, "unit": "KB", "minimum": 0},
+        "rom_kb": {"type": "integer", "required": false, "unit": "KB", "minimum": 0},
+        "vdd_min_v": {"type": "number", "required": false, "unit": "V", "minimum": 0},
+        "vdd_max_v": {"type": "number", "required": false, "unit": "V", "minimum": 0},
+        "io_voltage_min_v": {"type": "number", "required": false, "unit": "V", "minimum": 0},
+        "io_voltage_max_v": {"type": "number", "required": false, "unit": "V", "minimum": 0},
+        "temperature_min_c": {"type": "number", "required": false, "unit": "C"},
+        "temperature_max_c": {"type": "number", "required": false, "unit": "C"},
+        "low_power_mode": {"type": "boolean", "required": false},
+        "package": {"type": "string", "required": true},
+        "package_variant": {"type": "string", "required": false},
+        "pin_count": {"type": "integer", "required": true, "minimum": 1},
+        "gpio_count": {"type": "integer", "required": false, "minimum": 0},
+        "adc_channel_count": {"type": "integer", "required": false, "minimum": 0},
+        "adc_resolution_bits": {"type": "integer", "required": false, "minimum": 0},
+        "dac_channel_count": {"type": "integer", "required": false, "minimum": 0},
+        "timer_count": {"type": "integer", "required": false, "minimum": 0},
+        "pwm_channel_count": {"type": "integer", "required": false, "minimum": 0},
+        "uart_count": {"type": "integer", "required": false, "minimum": 0},
+        "usart_count": {"type": "integer", "required": false, "minimum": 0},
+        "spi_count": {"type": "integer", "required": false, "minimum": 0},
+        "i2c_count": {"type": "integer", "required": false, "minimum": 0},
+        "can_count": {"type": "integer", "required": false, "minimum": 0},
+        "usb": {"type": "boolean", "required": false},
+        "ethernet": {"type": "boolean", "required": false},
+        "sdio": {"type": "boolean", "required": false},
+        "qspi": {"type": "boolean", "required": false},
+        "rtc": {"type": "boolean", "required": false},
+        "watchdog": {"type": "boolean", "required": false},
+        "crypto_accelerator": {"type": "boolean", "required": false},
+        "trng": {"type": "boolean", "required": false},
+        "product_url": {"type": "url", "required": true},
+        "datasheet_url": {"type": "url", "required": true},
+        "source_name": {"type": "string", "required": true},
+        "source_checked_at": {"type": "date", "required": true, "format": "YYYY-MM-DD"},
+        "last_modified_at": {"type": "date", "required": true, "format": "YYYY-MM-DD"},
+        "source_note": {"type": "string", "required": false}
+      }
+    },
+    "mcu_features": {
+      "file": "mcu_features.csv",
+      "primary_key": "mcu_id + feature_code + unit",
+      "fields": {
+        "mcu_id": {"type": "reference", "required": true, "references": "mcus.mcu_id"},
+        "feature_code": {"type": "enum", "required": true, "enum": "feature_code"},
+        "value_type": {"type": "enum", "required": true, "enum": "value_type"},
+        "value_bool": {"type": "boolean", "required": false},
+        "value_number": {"type": "number", "required": false},
+        "value_text": {"type": "string", "required": false},
+        "unit": {"type": "string", "required": false},
+        "source_note": {"type": "string", "required": false}
+      }
+    }
+  }
+}

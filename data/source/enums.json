@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "lifecycle_status": ["active", "nrnd", "obsolete", "unknown"],
+  "record_status": ["verified", "needs_review", "incomplete"],
+  "visibility": ["published", "hidden"],
+  "architecture": ["ARM Cortex-M", "RISC-V", "8051", "AVR", "other"],
+  "value_type": ["bool", "integer", "decimal", "text"],
+  "feature_code": [
+    "usb_speed_mbps",
+    "usb_mode",
+    "can_fd",
+    "opamp",
+    "comparator",
+    "lcd_interface",
+    "camera_interface",
+    "external_memory_interface",
+    "hardware_float",
+    "fpu",
+    "dma_controller_count",
+    "bootloader_type"
+  ]
+}

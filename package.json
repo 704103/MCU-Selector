@@ -1,0 +1,11 @@
+{
+  "name": "mcu-selection-tool",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "validate:data": "node scripts/validate-data.mjs",
+    "generate:data": "node scripts/generate-data.mjs",
+    "build:data": "npm run validate:data && npm run generate:data"
+  }
+}

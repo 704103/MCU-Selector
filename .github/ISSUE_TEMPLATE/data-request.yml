@@ -1,0 +1,43 @@
+name: Data request
+description: Submit a request to add or correct MCU data.
+title: "data: "
+labels:
+  - data-request
+body:
+  - type: input
+    id: manufacturer
+    attributes:
+      label: Manufacturer
+      description: Manufacturer name.
+    validations:
+      required: true
+  - type: input
+    id: part_number
+    attributes:
+      label: Part number
+      description: Full orderable part number.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Requested change
+      description: Describe the requested addition or correction.
+    validations:
+      required: true
+  - type: input
+    id: product_url
+    attributes:
+      label: Official product URL
+    validations:
+      required: true
+  - type: input
+    id: datasheet_url
+    attributes:
+      label: Official datasheet URL
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes

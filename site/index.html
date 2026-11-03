@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MCU 选型数据目录</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #17212b; background: #f5f7f9; }
+    body { margin: 0; }
+    header { padding: 28px 5vw 22px; background: #17324d; color: white; }
+    header h1 { margin: 0 0 8px; font-size: clamp(1.45rem, 3vw, 2.15rem); }
+    header p { margin: 0; color: #d7e6f2; }
+    main { max-width: 1500px; margin: 0 auto; padding: 22px 5vw 48px; }
+    .controls { display: grid; grid-template-columns: minmax(240px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    label { display: grid; gap: 6px; font-size: .82rem; font-weight: 650; color: #44515d; }
+    input, select { width: 100%; box-sizing: border-box; min-height: 40px; padding: 8px 10px; border: 1px solid #bdc8d2; border-radius: 4px; background: white; color: inherit; font: inherit; }
+    .summary { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0; color: #53616d; font-size: .9rem; }
+    .table-wrap { overflow: auto; border: 1px solid #d5dde4; background: white; }
+    table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: .88rem; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #e3e8ec; text-align: left; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 1; background: #edf2f6; color: #344553; font-weight: 700; }
+    tr:hover td { background: #f7fafc; }
+    a { color: #1261a0; }
+    .empty { padding: 28px; text-align: center; color: #687784; }
+    @media (max-width: 760px) { .controls { grid-template-columns: 1fr; } main { padding-inline: 3vw; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MCU 选型数据目录</h1>
+    <p>首批 STM32 型号数据，参数来源于 ST 官方产品页和数据手册。</p>
+  </header>
+  <main>
+    <section class="controls" aria-label="筛选条件">
+      <label>关键字<input id="search" type="search" placeholder="型号、系列、内核或封装"></label>
+      <label>系列<select id="family"><option value="">全部系列</option></select></label>
+      <label>内核<select id="core"><option value="">全部内核</option></select></label>
+    </section>
+    <div class="summary" id="summary">正在加载数据...</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>型号</th><th>系列</th><th>内核</th><th>主频</th><th>Flash</th><th>SRAM</th><th>封装</th><th>引脚</th><th>GPIO</th><th>来源</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty" id="empty" hidden>没有符合条件的型号。</div>
+    </div>
+  </main>
+  <script>
+    const state = { catalog: [], metadata: {} };
+    const $ = (id) => document.getElementById(id);
+    const format = (value, unit) => value === null || value === undefined ? "-" : `${value}${unit}`;
+
+    function fillOptions(id, values) {
+      for (const value of values) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        $(id).append(option);
+      }
+    }
+
+    function render() {
+      const keyword = $("search").value.trim().toLowerCase();
+      const family = $("family").value;
+      const core = $("core").value;
+      const records = state.catalog.filter((record) => {
+        const text = [record.part_number, record.family, record.subfamily, record.description, record.manufacturer, record.core, record.package_variant].filter(Boolean).join(" ").toLowerCase();
+        return (!keyword || text.includes(keyword)) && (!family || record.family === family) && (!core || record.core === core);
+      });
+      $("rows").innerHTML = records.map((record) => `<tr><td><strong>${record.part_number}</strong></td><td>${record.family}</td><td>${record.core}</td><td>${format(record.max_frequency_mhz, " MHz")}</td><td>${format(record.flash_kb, " KB")}</td><td>${format(record.sram_kb, " KB")}</td><td>${record.package_variant || "-"}</td><td>${record.pin_count ?? "-"}</td><td>${record.gpio_count ?? "-"}</td><td><a href="${record.product_url}" target="_blank" rel="noreferrer">产品页</a> <a href="${record.datasheet_url}" target="_blank" rel="noreferrer">手册</a></td></tr>`).join("");
+      $("empty").hidden = records.length !== 0;
+      $("summary").textContent = `显示 ${records.length} / ${state.catalog.length} 个型号 | 数据生成时间：${state.metadata.generated_at ? new Date(state.metadata.generated_at).toLocaleString("zh-CN") : "-"}`;
+    }
+
+    Promise.all([fetch("data/catalog.json").then((response) => response.json()), fetch("data/metadata.json").then((response) => response.json())])
+      .then(([catalog, metadata]) => { state.catalog = catalog; state.metadata = metadata; fillOptions("family", metadata.families); fillOptions("core", [...new Set(catalog.map((record) => record.core))].sort()); render(); })
+      .catch(() => { $("summary").textContent = "数据加载失败，请检查发布目录中的生成文件。"; });
+
+    ["search", "family", "core"].forEach((id) => $(id).addEventListener("input", render));
+  </script>
+</body>
+</html>
