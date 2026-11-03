@@ -44,7 +44,24 @@
         {"path": "官方数据/Puya_PY32_Product_Selection.xls", "manufacturer": "puya", "parser": "puya", "format": "xls"}
       ]
     },
-    {"batch": 3, "status": "pending", "review_status": "not_started", "files": ["WCH_MCU_Selection.xlsx", "all nine PDF sources"]},
+    {
+      "batch": 3,
+      "status": "imported",
+      "record_count": 330,
+      "review_status": "automated_mapping_complete_manual_review_pending",
+      "files": [
+        {"path": "官方数据/WCH_MCU_Selection.xlsx", "manufacturer": "wch", "parser": "wch", "format": "xlsx", "record_count": 149},
+        {"path": "官方数据/MindMotion_MM32_Product_Selection_Guide_SC.pdf", "manufacturer": "mindmotion", "parser": "mindmotion-pdf", "format": "pdf", "record_count": 89},
+        {"path": "官方数据/Nationz_N32G031_Datasheet.pdf", "manufacturer": "nationz", "parser": "nationz-n32g031-pdf", "format": "pdf", "record_count": 11},
+        {"path": "官方数据/Nationz_N32G435_Datasheet.pdf", "manufacturer": "nationz", "parser": "nationz-n32g435-pdf", "format": "pdf", "record_count": 9},
+        {"path": "官方数据/Wuxin_CW32L012_Datasheet_CN.pdf", "manufacturer": "wuxin", "parser": "wuxin-pdf", "format": "pdf", "record_count": 2},
+        {"path": "官方数据/ESSEMI_ES32_Product_Catalog.pdf", "manufacturer": "essemi", "parser": "essemi-ocr", "format": "pdf", "record_count": 39},
+        {"path": "官方数据/GD32_MCU_Selection_Guide_2025_CN.pdf", "manufacturer": "gd32", "parser": "pdf-family-overview", "format": "pdf", "record_count": 0, "note": "家族概览图，未生成精确订货型号"},
+        {"path": "官方数据/Megawin_2026_MCU_Selection_Table_SC.pdf", "manufacturer": "megawin", "parser": "pdf-family-overview", "format": "pdf", "record_count": 0, "note": "选型表版式需进一步人工复核，未生成记录"},
+        {"path": "官方数据/Megawin_2026_Product_Manual_SC.pdf", "manufacturer": "megawin", "parser": "pdf-family-overview", "format": "pdf", "record_count": 0, "note": "产品手册未直接作为精确型号来源"},
+        {"path": "官方数据/Synwit_SWM_MCU_Catalog.pdf", "manufacturer": "synwit", "parser": "synwit-ocr", "format": "pdf", "record_count": 31}
+      ]
+    },
     {"batch": 4, "status": "pending", "review_status": "not_started", "files": ["first ten HTML sources"]},
     {"batch": 5, "status": "pending", "review_status": "not_started", "files": ["next ten HTML sources"]},
     {"batch": 6, "status": "pending", "review_status": "not_started", "files": ["next ten HTML sources"]},

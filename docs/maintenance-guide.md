@@ -105,6 +105,8 @@ npm run generate:data
 
 PDF 资料先使用 `pdftotext` 生成 Markdown 中间文件，再使用 `pdftoppm` 渲染代表页检查表格布局；扫描型 PDF 只有在 OCR 后仍能确认型号级参数时才进入主表。不能从 PDF 确认到具体订货型号的家族总览只保留来源记录，不直接生成型号行。
 
+批次 3 的 PDF 资料先使用 Poppler 转换并渲染，再使用 Tesseract OCR 处理 ESSEMI 和 Synwit 的扫描表格。OCR 结果保存为 `data/source/pdf-md/` 下的 Markdown 中间文件；ESSEMI 仅导入带封装的型号行，Synwit 的型号和主要配置经过目录图片复核。GD32 家族概览、Megawin 尚未完成型号级复核的资料只登记在 `data/source/import-manifest.json`，不生成主表记录。
+
 ## 9. 复核周期
 
 - 新增型号：合并前必须核验；

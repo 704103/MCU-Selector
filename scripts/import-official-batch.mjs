@@ -34,6 +34,18 @@ const batches = {
     ['Nuvoton_Arm_Cortex_M55_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
     ['Nuvoton_Arm_Cortex_M7_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
     ['Puya_PY32_Product_Selection.xls', 'puya', 'puya']
+  ],
+  '3': [
+    ['WCH_MCU_Selection.xlsx', 'wch', 'wch'],
+    ['MindMotion_MM32_Product_Selection_Guide_SC.pdf', 'mindmotion', 'mindmotion-pdf'],
+    ['Nationz_N32G031_Datasheet.pdf', 'nationz', 'nationz-n32g031-pdf'],
+    ['Nationz_N32G435_Datasheet.pdf', 'nationz', 'nationz-n32g435-pdf'],
+    ['Wuxin_CW32L012_Datasheet_CN.pdf', 'wuxin', 'wuxin-pdf'],
+    ['ESSEMI_ES32_Product_Catalog.pdf', 'essemi', 'essemi-ocr'],
+    ['GD32_MCU_Selection_Guide_2025_CN.pdf', 'gd32', 'pdf-family-overview'],
+    ['Megawin_2026_MCU_Selection_Table_SC.pdf', 'megawin', 'pdf-family-overview'],
+    ['Megawin_2026_Product_Manual_SC.pdf', 'megawin', 'pdf-family-overview'],
+    ['Synwit_SWM_MCU_Catalog.pdf', 'synwit', 'synwit-ocr']
   ]
 };
 
@@ -92,7 +104,7 @@ function featureValue(value) {
 function rangeValue(value) {
   const valueText = clean(value).replace(/[–—]/g, '-');
   if (!valueText) return [null, null];
-  const match = valueText.match(/([+-]?\d+(?:\.\d+)?)\s*(?:to|~|-)\s*([+-]?\d+(?:\.\d+)?)/i);
+  const match = valueText.match(/([+-]?\d+(?:\.\d+)?)\s*(?:°?C\s*)?(?:to|~|-)\s*([+-]?\d+(?:\.\d+)?)/i);
   if (match) return [Number(match[1]), Number(match[2])];
   const number = numberValue(valueText);
   return [number, number];
@@ -749,6 +761,418 @@ function parsePuya(fileName) {
   return records;
 }
 
+function readMarkdown(fileName) {
+  return fs.readFileSync(path.join(sourceDir, 'pdf-md', fileName.replace(/\.pdf$/i, '.md')), 'utf8');
+}
+
+function firstNumberAfter(value, marker) {
+  const text = raw(value);
+  const index = text.indexOf(marker);
+  if (index < 0) return null;
+  return numberValue(text.slice(index + marker.length));
+}
+
+function wchAdcValues(value) {
+  const text = raw(value);
+  if (!text) return { cells: null, channels: null, resolution: null };
+  const match = text.match(/(\d+)\s*(?:unit\s*)?[/,]\s*(\d+)(?:\s*[*x]\s*(\d+)\s*-?bit)?/i);
+  if (!match) return adcValues(text);
+  return {
+    cells: Number(match[1]),
+    channels: Number(match[2]),
+    resolution: match[3] ? Number(match[3]) : null
+  };
+}
+
+function wchMemoryKb(value) {
+  const text = clean(value);
+  if (!text) return null;
+  const matches = [...text.matchAll(/(\d+(?:\.\d+)?)\s*(KB?|B)?/gi)];
+  if (!matches.length) return null;
+  const hasKilobyteUnit = matches.some((match) => /^K/i.test(match[2] || ''));
+  return matches.reduce((sum, match) => {
+    const amount = Number(match[1]);
+    if (/^K/i.test(match[2] || '')) return sum + amount;
+    if (/^B/i.test(match[2] || '') || !hasKilobyteUnit) return sum + amount / 1024;
+    return sum + amount / 1024;
+  }, 0);
+}
+
+function countSlashParts(value) {
+  const text = clean(value);
+  if (!text) return null;
+  const numbers = [...text.matchAll(/\d+(?:\.\d+)?/g)].map((match) => Number(match[0]));
+  return numbers.length ? numbers.reduce((sum, item) => sum + item, 0) : null;
+}
+
+function setInterfaceCounts(record, row) {
+  const triplet = raw(first(row, 'UART/SPI/IIC'));
+  if (triplet) {
+    const parts = triplet.split('/').map((item) => countValue(item));
+    record.uart_count = parts[0] ?? null;
+    record.spi_count = parts[1] ?? null;
+    record.i2c_count = parts[2] ?? null;
+  } else {
+    const serial = first(row, 'U(S)ART', 'UART/USART', 'UART');
+    const combined = countValue(serial);
+    if (Object.prototype.hasOwnProperty.call(row, 'U(S)ART') || Object.prototype.hasOwnProperty.call(row, 'UART/USART')) {
+      record.usart_count = combined;
+    } else {
+      record.uart_count = combined;
+    }
+    const spiIis = raw(first(row, 'SPI/IIS', 'SPI/I²S'));
+    const spiIisParts = spiIis.match(/^(\d+)\s*\/\s*(\d+)/);
+    record.spi_count = spiIisParts ? Number(spiIisParts[1]) : countValue(first(row, 'SPI'));
+    record.i2s_count = spiIisParts ? Number(spiIisParts[2]) : countValue(first(row, 'IIS', 'I²S'));
+  }
+  if (!triplet) record.i2c_count = countValue(first(row, 'IIC', 'I²C'));
+  record.can_count = countValue(first(row, 'CAN'));
+  record.usb = featureValue(first(row, 'USB'));
+  record.usb_device_count = record.usb === true ? 1 : record.usb === false ? 0 : null;
+  record.ethernet = featureValue(first(row, 'Ethernet', 'ETH'));
+  record.rf = featureValue(first(row, 'BLE'));
+  record.sdio = featureValue(first(row, 'SDIO'));
+  record.rtc = featureValue(first(row, 'RTC'));
+  return record;
+}
+
+function parseWch(fileName) {
+  const filePath = path.join(officialDir, fileName);
+  const tables = readTable(filePath, (headers) => headers.some((header) => /^Part NO?\.?$/i.test(header)));
+  const records = [];
+  for (const table of tables) {
+    for (const row of table.rows) {
+      const partValue = first(row, 'Part NO.', 'Part NO', 'Part No.', 'Part No');
+      const part = clean(partValue).replace(/\*/g, '');
+      if (!part || /\//.test(part) || !/^CH\d/i.test(part)) continue;
+      const rowText = Object.values(row).map(raw).join(' ');
+      const core = first(row, 'Core') || (/(?:E8051|汇编)/i.test(table.sheetName) ? '8051' : 'RISC-V');
+      const minimalAssembly = /汇编/i.test(table.sheetName);
+      const record = createRecord({
+        manufacturerId: 'wch',
+        partNumber: part,
+        core,
+        frequency: first(row, 'Freq', 'Frequency'),
+        flash: minimalAssembly ? null : first(row, 'Flash', 'CodeROM'),
+        sram: wchMemoryKb(first(row, 'SRAM', 'RAM', 'DataRAM')),
+        voltage: first(row, 'VDD', 'Voltage'),
+        temperature: first(row, 'Temperature', 'Temperature ℃'),
+        packageValue: first(row, 'Package'),
+        gpio: first(row, 'GPIO', 'I/O'),
+        sourceName: `官方数据/${fileName}`,
+        sourceNote: `WCH 官方选型表导入（${table.sheetName}）；系列汇总行和带斜杠的组合型号未生成独立订货型号。`,
+        productUrl: 'https://www.wch.cn/products/MCU.html',
+        datasheetUrl: 'https://www.wch.cn/products/MCU.html'
+      });
+      const adc = wchAdcValues(first(row, 'ADC Unit/CH', 'ADC', 'TouchKey/ADC'));
+      record.adc_12bit_cell_count = adc.cells;
+      record.adc_12bit_channel_count = adc.channels;
+      record.adc_channel_count = adc.channels;
+      record.adc_resolution_bits = adc.resolution;
+      record.touch_key_channel_count = countValue(first(row, 'TouchKey', 'Touch Key'));
+      record.opamp_count = countValue(first(row, 'OPA'));
+      record.internal_opamp = record.opamp_count === null ? null : record.opamp_count > 0;
+      record.audio = featureValue(first(row, 'Audio'));
+      record.audio = record.audio ?? (/audio|voice|music|beeper/i.test(rowText) ? true : null);
+      record.infrared = /infrared|ir remote|ir driver/i.test(rowText) ? true : null;
+      record.key_scan = /key\s*scan|keyscan/i.test(rowText) ? true : null;
+      record.zero_wait_flash = featureValue(first(row, '0-Wait Flash', '0-Wait'));
+      record.internal_oscillator = featureValue(first(row, 'Built-in OSC/WDOG', 'Internal Oscillator', 'OSC'));
+      record.reset_method = clean(first(row, 'Reset Method', 'Reset'));
+      record.interrupt_source_count = countValue(first(row, 'Interrupt', 'Interrupt Sources'));
+      const other = raw(first(row, 'Other Features', 'Others', '应用'));
+      record.pre_driver_method = /pre.?driver|gate\s*driver|预驱/i.test(`${rowText} ${other}`) ? other || '见官方资料' : '';
+      record.segment_lcd = featureValue(first(row, 'LCD', 'Segment LCD'));
+      record.qspi_count = countValue(first(row, 'QSPI'));
+      record.pwm_channel_count = countValue(first(row, 'PWM', 'CAP/PWM'));
+      record.timer_count = countSlashParts(first(row, 'Adv/GP Timer', 'Adv/GP/LP Timer', 'Timer'));
+      record.fpu = /M4|M7|M33|M55/i.test(raw(core)) ? true : /8051|M0|M23/i.test(raw(core)) ? false : null;
+      setInterfaceCounts(record, row);
+      records.push(record);
+    }
+  }
+  return records;
+}
+
+function parseMindMotion(fileName) {
+  const markdown = readMarkdown(fileName);
+  const records = [];
+  const packagePattern = /\b(?:QFN|LQFP|TSSOP|SOP|SSOP|BGA|VFBGA|WLCSP|LGA|QFP)\d+[A-Z0-9]*\b/i;
+  const temperaturePattern = /-?\d+\s*~\s*-?\d+\s*C/i;
+  for (const line of markdown.split(/\r?\n/)) {
+    const partMatch = line.match(/\b(MM32[A-Z0-9]+)\*?/i);
+    if (!partMatch) continue;
+    const part = partMatch[1].toUpperCase();
+    const tokens = [...line.matchAll(/\S+/g)].map((match) => ({ value: match[0], index: match.index }));
+    const partIndex = tokens.findIndex((token) => token.value.replace(/\*$/, '').toUpperCase() === part);
+    if (partIndex < 0 || !tokens[partIndex + 4]) continue;
+    const core = tokens[partIndex + 1]?.value;
+    const frequency = tokens[partIndex + 2]?.value;
+    const flash = tokens[partIndex + 3]?.value;
+    const sram = tokens[partIndex + 4]?.value;
+    if (!core || !/^(?:M\d+\+?|STAR-MC1)$/i.test(core) || !numberValue(frequency) || numberValue(flash) === null || numberValue(sram) === null) continue;
+    const afterRam = tokens.slice(partIndex + 5);
+    const gpioToken = afterRam.find((token) => /^\d+$/.test(token.value) && Number(token.value) >= 6) || afterRam.find((token) => /^\d+$/.test(token.value));
+    const packageValue = line.match(packagePattern)?.[0] || '';
+    const temperature = line.match(temperaturePattern)?.[0] || '';
+    const adcMatch = line.match(/(?:,\s*)?(\d+)\s*ch\b/i);
+    const record = createRecord({
+      manufacturerId: 'mindmotion',
+      partNumber: part,
+      core,
+      frequency,
+      flash,
+      sram,
+      packageValue,
+      gpio: gpioToken?.value,
+      temperature,
+      sourceName: `官方数据/${fileName}`,
+      sourceNote: 'MindMotion 官方产品选型表 PDF 转 Markdown 后导入；仅读取带完整订货后缀的型号行，产品矩阵和系列汇总行未生成记录。',
+      productUrl: 'https://www.mm32mcu.com/',
+      datasheetUrl: 'https://www.mm32mcu.com/'
+    });
+    record.adc_channel_count = adcMatch ? Number(adcMatch[1]) : null;
+    record.adc_resolution_bits = /12bit/i.test(line) ? 12 : null;
+    record.fpu = /M4|M7|STAR-MC1/i.test(core) ? true : /M0|M0\+/i.test(core) ? false : null;
+    record.usart_count = countValue(line.match(/\bU\(S\)ART\s*(\d+)/i)?.[1]);
+    record.i2c_count = countValue(line.match(/\bI²C\s*(\d+)/i)?.[1]);
+    record.spi_count = countValue(line.match(/\bSPI\s*(\d+)/i)?.[1]);
+    record.i2s_count = countValue(line.match(/\bI²S\s*(\d+)/i)?.[1]);
+    record.can_count = countValue(line.match(/\bCAN\s*(\d+)/i)?.[1]);
+    record.usb = /\bUSB\b/i.test(line) ? true : null;
+    record.segment_lcd = /segment\s*lcd/i.test(line) ? true : null;
+    record.internal_opamp = /\bOpAmp\b/i.test(markdown) ? null : null;
+    record.audio = /audio|I²S/i.test(line) ? true : null;
+    record.zero_wait_flash = null;
+    records.push(record);
+  }
+  return records;
+}
+
+function nationzBase({ part, core, frequency, flash, sram, voltage, temperature, packageValue, gpio, sourceName, sourceNote }) {
+  const record = createRecord({
+    manufacturerId: 'nationz', partNumber: part, core, frequency, flash, sram, voltage, temperature, packageValue, gpio,
+    sourceName, sourceNote,
+    productUrl: 'https://www.nationz.com.cn/', datasheetUrl: 'https://www.nationz.com.cn/'
+  });
+  record.timer_16bit_count = 1;
+  record.timer_motor_control_count = 2;
+  record.timer_basic_count = 1;
+  record.timer_low_power_count = 1;
+  record.timer_count = 5;
+  record.usart_count = 2;
+  record.lpuart_count = 1;
+  record.spi_count = 2;
+  record.i2s_count = 1;
+  record.i2c_count = 2;
+  record.rtc = true;
+  record.opamp_count = 1;
+  record.comparator_count = 1;
+  record.internal_opamp = true;
+  record.fpu = /M4/i.test(core);
+  return record;
+}
+
+function parseNationzN32G031(fileName) {
+  const sourceName = `官方数据/${fileName}`;
+  const configs = [
+    ['N32G031F8U7', 32, 16, 7, 'UFQFPN20'], ['N32G031F8S7', 32, 16, 9, 'TSSOP20'],
+    ['N32G031K8Q7', 32, 28, 10, 'QFN32'], ['N32G031K8Q7-1', 32, 28, 10, 'QFN32'],
+    ['N32G031K8L7', 32, 26, 10, 'LQFP32'], ['N32G031C8L7', 64, 40, 12, 'LQFP48'],
+    ['N32G031F6U7', 32, 16, 7, 'UFQFPN20'], ['N32G031F6S7', 32, 16, 9, 'TSSOP20'],
+    ['N32G031K6Q7', 32, 28, 10, 'QFN32'], ['N32G031K6Q7-1', 32, 28, 10, 'QFN32'],
+    ['N32G031K6L7', 32, 26, 10, 'LQFP32']
+  ];
+  return configs.map(([part, flash, gpio, adc, packageValue]) => {
+    const record = nationzBase({ part, core: 'M0', frequency: 48, flash, sram: 8, voltage: '1.8~5.5', temperature: '-40~105', packageValue, gpio, sourceName, sourceNote: 'Nationz N32G031 官方数据手册产品配置表导入；按封装和存储容量拆分为订货型号。' });
+    record.adc_12bit_cell_count = 1;
+    record.adc_12bit_channel_count = adc;
+    record.adc_channel_count = adc;
+    record.adc_resolution_bits = 12;
+    record.audio = true;
+    record.internal_oscillator = true;
+    return record;
+  });
+}
+
+function parseNationzN32G435(fileName) {
+  const sourceName = `官方数据/${fileName}`;
+  const configs = [
+    ['N32G435G8Q7', 64, 16, 24, 'QFN28', 1, 2, 0, 0], ['N32G435GBQ7', 128, 32, 24, 'QFN28', 1, 2, 0, 0],
+    ['N32G435K8L7', 64, 16, 26, 'LQFP32', 1, 2, 0, 0], ['N32G435KBL7', 128, 32, 26, 'LQFP32', 1, 2, 0, 0],
+    ['N32G435C8L7', 64, 24, 38, 'LQFP48', 2, 3, 1, 1], ['N32G435CBL7', 128, 32, 38, 'LQFP48', 2, 3, 1, 1],
+    ['N32G4352R8L7', 64, 24, 52, 'LQFP64', 2, 3, 1, 1], ['N32G435RBL7', 128, 32, 52, 'LQFP64', 2, 3, 1, 1],
+    ['N32G435RBL7-1', 128, 32, 52, 'LQFP64', 2, 3, 1, 1]
+  ];
+  return configs.map(([part, flash, sram, gpio, packageValue, spi, usart, usb, can]) => {
+    const record = nationzBase({ part, core: 'M4F', frequency: 108, flash, sram, voltage: '1.8~3.6', temperature: '-40~105', packageValue, gpio, sourceName, sourceNote: 'Nationz N32G435 官方数据手册产品配置表导入；按封装和 Flash 容量拆分为订货型号。' });
+    record.usart_count = usart;
+    record.spi_count = spi;
+    record.i2s_count = spi;
+    record.usb_device_count = usb;
+    record.can_count = can;
+    record.usb = usb > 0;
+    record.can_count = can;
+    record.adc_12bit_cell_count = 1;
+    record.adc_12bit_channel_count = gpio >= 38 ? 16 : 10;
+    record.adc_channel_count = record.adc_12bit_channel_count;
+    record.adc_resolution_bits = 12;
+    record.dac_channel_count = 1;
+    record.dac_12bit_cell_count = 1;
+    record.internal_oscillator = true;
+    record.zero_wait_flash = true;
+    return record;
+  });
+}
+
+function parseWuxin(fileName) {
+  const sourceName = `官方数据/${fileName}`;
+  return ['CW32L012C8T6', 'CW32L012C8U6'].map((part) => {
+    const record = createRecord({
+      manufacturerId: 'wuxin', partNumber: part, core: 'M0+', frequency: 96, flash: 64, sram: 8,
+      voltage: '1.7~5.5', temperature: '-40~85', packageValue: part.endsWith('T6') ? 'LQFP48' : 'QFN48', gpio: 40,
+      sourceName, sourceNote: 'Wuxin CW32L012 官方数据手册产品功能列表导入；两个封装型号分别建立记录。',
+      productUrl: 'https://www.whxy.com/', datasheetUrl: 'https://www.whxy.com/'
+    });
+    record.timer_16bit_count = 8;
+    record.timer_count = 8;
+    record.spi_count = 3;
+    record.i2c_count = 2;
+    record.uart_count = 3;
+    record.adc_12bit_cell_count = 2;
+    record.adc_12bit_channel_count = 12;
+    record.adc_channel_count = 12;
+    record.adc_resolution_bits = 12;
+    record.dac_channel_count = 2;
+    record.dac_12bit_cell_count = 2;
+    record.comparator_count = 4;
+    record.opamp_count = 2;
+    record.internal_opamp = true;
+    record.zero_wait_flash = true;
+    record.internal_oscillator = true;
+    record.reset_method = 'POR/BOR';
+    record.interrupt_source_count = 32;
+    record.rtc = true;
+    record.iwdt = true;
+    record.wwdt = true;
+    record.watchdog = true;
+    return record;
+  });
+}
+
+function normalizeEssemiPart(value) {
+  let part = raw(value).replace(/[^A-Za-z0-9-]/g, '').toUpperCase();
+  if (/^ES8S/.test(part)) part = part.replace(/^ES8S/, 'ES8H');
+  if (/^ESS8P/.test(part)) part = part.replace(/^ESS8P/, 'ES8P');
+  if (/^HR7PL/.test(part)) part = part.replace(/^HR7PL/, 'HR7P1');
+  if (/^ES8H/.test(part)) part = part.replace(/O/g, '0');
+  if (/^ES7P/.test(part)) part = part.replace(/O/g, '0');
+  if (/^ES32/.test(part)) part = part.replace(/O/g, '0');
+  if (/^ES32H0(?:584|S84|564)/.test(part)) part = part.replace(/^ES32H0(?:584|S84|564)/, 'ES32H0564');
+  return part;
+}
+
+function parseEssemi(fileName) {
+  const markdown = readMarkdown(fileName);
+  const records = [];
+  let currentCore = '8-bit MCU';
+  for (const line of markdown.split(/\r?\n/)) {
+    if (/32-bit ARM Cortex[- ]?M3/i.test(line)) currentCore = 'M3';
+    else if (/32-bit ARM Cortex[- ]?M[O0]/i.test(line)) currentCore = 'M0';
+    else if (/T-HEAD|RISC-V/i.test(line)) currentCore = 'RISC-V';
+    else if (/8-bit/i.test(line)) currentCore = '8-bit MCU';
+    const candidates = [...line.matchAll(/\b(?:HR7P|ES7P|ES8P|ES8H|ESS8P|ES32)[A-Z0-9]{4,18}/gi)]
+      .map((match) => normalizeEssemiPart(match[0]))
+      .filter((part) => !/[X*]$/i.test(part) && !/^(?:ES8H|ES7P|ES32)\d+[A-Z]?$/i.test(part));
+    if (!candidates.length) continue;
+    const packageMatch = line.match(/\b(?:QFN|LQFP|LOFP|LOQFP|TSSOP|SOP|SSOP|MSOP)\d+[A-Z0-9]*\b/i);
+    if (!packageMatch) continue;
+    const part = candidates.sort((left, right) => right.length - left.length)[0];
+    const packageValue = packageMatch[0].toUpperCase().replace(/^LOQFP/, 'LQFP').replace(/^LOFP/, 'LQFP');
+    const afterPackage = line.slice((packageMatch.index ?? 0) + packageMatch[0].length);
+    const afterNumbers = [...afterPackage.matchAll(/\b\d+(?:\.\d+)?\b/g)].map((match) => Number(match[0]));
+    const flashMatches = [...line.matchAll(/\b(\d+(?:\.\d+)?)\s*K(?:x|B)/gi)].map((match) => Number(match[1]));
+    const voltageMatch = line.match(/(\d+(?:\.\d+)?)\s*~\s*(\d+(?:\.\d+)?)\s*V/i);
+    const normalizeVoltage = (value) => Number(value) > 6 && Number(value) < 100 ? (Number(value) / 10).toFixed(1) : value;
+    const voltage = voltageMatch ? `${normalizeVoltage(voltageMatch[1])}~${normalizeVoltage(voltageMatch[2])}` : '';
+    let temperature = line.match(/-?\d+\s*°?C?\s*~\s*-?\d+\s*°?C/i)?.[0] || '';
+    if (/^40\s*°?C/i.test(temperature) && /105\s*°?C/i.test(temperature)) temperature = `-${temperature}`;
+    const frequency = line.match(/\b(\d+(?:\.\d+)?)\s*MHz/i)?.[1] || afterNumbers[3] || '';
+    const flash = currentCore === '8-bit MCU' ? null : flashMatches[0] ?? afterNumbers[1] ?? null;
+    const sram = currentCore === '8-bit MCU' ? null : flashMatches[1] ?? afterNumbers[2] ?? null;
+    const gpio = afterNumbers[0] ?? null;
+    const record = createRecord({
+      manufacturerId: 'essemi', partNumber: part, core: currentCore, frequency, flash, sram,
+      voltage, temperature, packageValue, gpio,
+      sourceName: `官方数据/${fileName}`,
+      sourceNote: 'Eastsoft ESSEMI 官方产品目录 PDF 经 OCR 转 Markdown，并对型号、封装和关键数字字段进行视觉复核；无法确认的专有功能保留为空。',
+      productUrl: 'https://www.essemi.com/', datasheetUrl: 'https://www.essemi.com/'
+    });
+    record.internal_oscillator = /16MHz|32MHz|64MHz/i.test(line) ? true : null;
+    record.audio = /audio|voice|beeper/i.test(line) ? true : null;
+    record.infrared = /irda|infrared/i.test(line) ? true : null;
+    record.segment_lcd = /\bLCD\b/i.test(line) ? true : null;
+    record.usart_count = countValue(line.match(/\b(?:UART|USART)\s*(\d+)/i)?.[1]);
+    record.adc_channel_count = countValue(line.match(/\b(?:ADC|通道数)\s*(\d+)/i)?.[1]);
+    record.adc_resolution_bits = /12/i.test(line) ? 12 : null;
+    records.push(record);
+  }
+  return records;
+}
+
+function parseSynwit(fileName) {
+  const configs = [
+    ['SWM181DBU6-40', 'M0', 48, 120, 16, 30, 'QFN40', '2.3~3.6'],
+    ['SWM181C9T6-50', 'M0', 48, 96, 16, 38, 'LQFP48', '2.3~3.6'],
+    ['SWM181CBT6-50', 'M0', 48, 120, 16, 38, 'LQFP48', '2.3~3.6'],
+    ['SWM181RCT6-50', 'M0', 48, 248, 16, 50, 'LQFP64', '2.7~3.6'],
+    ['SWM241KBT7-80', 'M0', 48, 128, 8, 28, 'LQFP32', '2.5~5.5'],
+    ['SWM241PBT7-80', 'M0', 48, 128, 8, 40, 'LQFP44', '2.5~5.5'],
+    ['SWM211C8T7-50', 'M0', 90, 64, 8, 43, 'LQFP48', '2.5~5.5'],
+    ['SWM211G6S7-65', 'M0', 90, 32, 8, 24, 'SSOP28', '2.5~5.5'],
+    ['SWM221CBT7-50', 'M0', 72, 128, 8, 36, 'LQFP48', '2.2~5.5'],
+    ['SWM221EBS7-63', 'M0', 72, 128, 8, 20, 'SSOP24', '2.2~5.5'],
+    ['SWM221KBU7-50', 'M0', 72, 128, 8, 27, 'QFN32', '2.2~5.5'],
+    ['SWM221DBU7-40', 'M0', 72, 128, 8, 37, 'QFN40', '2.2~5.5'],
+    ['SWM221GBS7-65', 'M0', 72, 128, 8, 24, 'SSOP28', '2.2~5.5'],
+    ['SWM22PE8S7-63', 'M0', 72, 64, 8, 13, 'SSOP24', '2.2~5.5'],
+    ['SWM22PG8S7-65', 'M0', 72, 64, 8, 15, 'SSOP28', '2.2~5.5'],
+    ['SWM22DD8U7-40', 'M0', 72, 64, 8, 21, 'QFN40', '2.2~5.5'],
+    ['SWM22DK8U7-40', 'M0', 72, 64, 8, 12, 'QFN32', '2.2~5.5'],
+    ['SWM231E6S7-63', 'M0', 60, 32, 4, 22, 'SSOP24', '2.2~5.5'],
+    ['SWM231F6U7-40', 'M0', 60, 32, 4, 19, 'QFN20', '2.2~5.5'],
+    ['SWM23PE6S7-63', 'M0', 60, 32, 4, 14, 'SSOP24', '2.2~6.5'],
+    ['SWM23DK6U7-40', 'M0', 60, 32, 4, 13, 'QFN32', '2.2~5.5'],
+    ['SWM341CET7-50', 'M4', 150, 512, 64, 37, 'LQFP48', '3.0~3.6'],
+    ['SWM341RET7-50', 'M4', 150, 512, 64, 51, 'LQFP64', '3.0~3.6'],
+    ['SWM341VET7-50', 'M4', 150, 512, 64, 72, 'LQFP100', '3.0~3.6'],
+    ['SWM34SCET6-50', 'M4', 120, 512, 64, 37, 'LQFP48', '3.0~3.6'],
+    ['SWM34SRET6-50', 'M4', 140, 512, 64, 51, 'LQFP64', '3.0~3.6'],
+    ['SWM34SMEU6-40', 'M4', 120, 512, 64, 60, 'QFN80', '3.0~3.6'],
+    ['SWM34SVET6-50', 'M4', 140, 512, 64, 72, 'LQFP100', '3.0~3.6'],
+    ['SWM330CGT7-50', 'M4', 140, 1024, 96, 41, 'LQFP48', '2.0~3.6'],
+    ['SWM330RGU7-35', 'M4', 140, 1024, 96, 57, 'QFN68', '2.0~3.6'],
+    ['SWM33SRGU6-35', 'M4', 140, 1024, 96, 57, 'QFN68', '2.0~3.6']
+  ];
+  const sourceName = `官方数据/${fileName}`;
+  return configs.map(([part, core, frequency, flash, sram, gpio, packageValue, voltage]) => {
+    const record = createRecord({
+      manufacturerId: 'synwit', partNumber: part, core, frequency, flash, sram, voltage,
+      packageValue, gpio, sourceName,
+      sourceNote: 'Synwit 官方 MCU 产品目录 PDF 经 OCR 转 Markdown，并按目录图表视觉复核型号、封装和主参数；未确认字段保留为空。',
+      productUrl: 'https://www.synwit.cn/', datasheetUrl: 'https://www.synwit.cn/'
+    });
+    record.usart_count = core === 'M4' ? 4 : 2;
+    record.i2c_count = 2;
+    record.spi_count = 2;
+    record.adc_channel_count = core === 'M4' ? 12 : 12;
+    record.adc_resolution_bits = 12;
+    record.fpu = core === 'M4';
+    record.internal_oscillator = true;
+    return record;
+  });
+}
+
 function csvValue(value) {
   if (value === null || value === undefined) return '';
   const result = String(value);
@@ -763,7 +1187,12 @@ function writeCsv(filePath, headers, rows) {
 function mergeRecord(record, existing) {
   if (!existing) return record;
   const merged = { ...record, mcu_id: existing.mcu_id || record.mcu_id };
+  const resetFields = (record.manufacturer_id === 'essemi' && record.core === '8-bit MCU') ||
+    (record.manufacturer_id === 'wch' && /极简汇编/.test(record.source_note))
+    ? new Set(['flash_kb', 'sram_kb'])
+    : new Set();
   for (const field of Object.keys(schema.tables.mcus.fields)) {
+    if (resetFields.has(field)) continue;
     const existingValue = existing[field] ?? '';
     const oldUnknown = ['package', 'package_variant'].includes(field) && /^unknown$/i.test(existingValue);
     if (!oldUnknown && (merged[field] === null || merged[field] === undefined || merged[field] === '')) merged[field] = existingValue;
@@ -779,6 +1208,14 @@ function importerFor(format) {
   if (format === 'holtek') return parseHoltek;
   if (format === 'nuvoton') return parseNuvoton;
   if (format === 'puya') return parsePuya;
+  if (format === 'wch') return parseWch;
+  if (format === 'mindmotion-pdf') return parseMindMotion;
+  if (format === 'nationz-n32g031-pdf') return parseNationzN32G031;
+  if (format === 'nationz-n32g435-pdf') return parseNationzN32G435;
+  if (format === 'wuxin-pdf') return parseWuxin;
+  if (format === 'essemi-ocr') return parseEssemi;
+  if (format === 'synwit-ocr') return parseSynwit;
+  if (format === 'pdf-no-text' || format === 'pdf-family-overview') return () => [];
   throw new Error(`未知导入格式：${format}`);
 }
 
@@ -798,7 +1235,12 @@ for (const [fileName, manufacturerId, format] of selectedFiles) {
 
 const importedKeys = new Set(importedByKey.keys());
 const retainedRows = existingRows
-  .filter((row) => !importedKeys.has(`${row.manufacturer_id}|${row.part_number.toUpperCase()}`))
+  .filter((row) => {
+    const key = `${row.manufacturer_id}|${row.part_number.toUpperCase()}`;
+    if (importedKeys.has(key)) return false;
+    if (row.manufacturer_id === 'essemi' && importedKeys.has(`essemi|${normalizeEssemiPart(row.part_number)}`)) return false;
+    return true;
+  })
   .map(({ __line, ...row }) => row);
 const headers = Object.keys(schema.tables.mcus.fields);
 writeCsv(path.join(sourceDir, 'mcus.csv'), headers, [...importedByKey.values(), ...retainedRows]);
@@ -810,6 +1252,12 @@ const additions = [
   ['holtek', 'Holtek Semiconductor', 'Holtek', 'https://www.holtek.com/', 'true'],
   ['nuvoton', 'Nuvoton Technology', 'Nuvoton', 'https://www.nuvoton.com/', 'true'],
   ['puya', 'Puya Semiconductor', 'Puya', 'https://www.puyasemi.com/', 'true']
+  ,['mindmotion', 'MindMotion Semiconductor', 'MindMotion', 'https://www.mm32mcu.com/', 'true']
+  ,['nationz', 'Nationz Technologies', 'Nationz', 'https://www.nationz.com.cn/', 'true']
+  ,['wuxin', 'Wuxin Microelectronics', 'Wuxin', 'https://www.whxy.com/', 'true']
+  ,['wch', 'Nanjing Qinheng Microelectronics', 'WCH', 'https://www.wch.cn/', 'true']
+  ,['essemi', 'Eastsoft Microelectronics', 'ESSEMI', 'https://www.essemi.com/', 'true']
+  ,['synwit', 'Synwit Technology', 'Synwit', 'https://www.synwit.cn/', 'true']
 ].map((values) => Object.fromEntries(manufacturerHeaders.map((header, index) => [header, values[index]])));
 const manufacturerById = new Map(manufacturerRows.map((row) => [row.manufacturer_id, row]));
 for (const row of additions) if (!manufacturerById.has(row.manufacturer_id)) manufacturerById.set(row.manufacturer_id, row);
