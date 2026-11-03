@@ -22,6 +22,18 @@ const batches = {
     ['Holtek_32bit_MCU_Selection.xlsx', 'holtek', 'holtek'],
     ['Holtek_8bit_MCU_Selection.xlsx', 'holtek', 'holtek'],
     ['Nuvoton_32bit_KM103_MCU_Selection.xls', 'nuvoton', 'nuvoton']
+  ],
+  '2': [
+    ['Nuvoton_8bit_8051_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_8bit_KM101_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_Arm_Cortex_M0Plus_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_Arm_Cortex_M0_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_Arm_Cortex_M23_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_Arm_Cortex_M33_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_Arm_Cortex_M4_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_Arm_Cortex_M55_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Nuvoton_Arm_Cortex_M7_MCU_Selection.xls', 'nuvoton', 'nuvoton'],
+    ['Puya_PY32_Product_Selection.xls', 'puya', 'puya']
   ]
 };
 
@@ -80,7 +92,7 @@ function featureValue(value) {
 function rangeValue(value) {
   const valueText = clean(value).replace(/[–—]/g, '-');
   if (!valueText) return [null, null];
-  const match = valueText.match(/(-?\d+(?:\.\d+)?)\s*(?:to|~|-)\s*(-?\d+(?:\.\d+)?)/i);
+  const match = valueText.match(/([+-]?\d+(?:\.\d+)?)\s*(?:to|~|-)\s*([+-]?\d+(?:\.\d+)?)/i);
   if (match) return [Number(match[1]), Number(match[2])];
   const number = numberValue(valueText);
   return [number, number];
@@ -91,6 +103,14 @@ function splitMemory(value) {
   if (!valueText) return null;
   const numbers = [...valueText.matchAll(/\d+(?:\.\d+)?/g)].map((match) => Number(match[0]));
   return numbers.length ? numbers[0] : null;
+}
+
+function memoryKb(value) {
+  const valueText = clean(value);
+  if (!valueText) return null;
+  const matches = [...valueText.matchAll(/(\d+(?:\.\d+)?)\s*(K|KB|B)?/gi)];
+  if (!matches.length) return null;
+  return matches.reduce((sum, match) => sum + Number(match[1]) / (/^b$/i.test(match[2] || '') ? 1024 : 1), 0);
 }
 
 function parsePinCount(packageValue, fallback = null) {
@@ -107,7 +127,7 @@ function packageName(packageValue) {
 }
 
 function normalizeCore(value) {
-  const valueText = clean(value).replace(/[®™]/g, '').replace(/Arm\s*/i, '').trim();
+  const valueText = clean(value).replace(/[®™]/g, '').replace(/Arm\s*/i, '').replace(/M(\d+)Plus/ig, 'M$1+').trim();
   if (!valueText) return 'unknown';
   const match = valueText.match(/M\d+\+?/i);
   if (match) return `Cortex-${match[0].toUpperCase()}`;
@@ -211,6 +231,8 @@ function adcValues(value) {
     const selected = bitMatches.sort((left, right) => Number(right[2]) - Number(left[2]))[0];
     return { channels: Number(selected[2]), resolution: Number(selected[1]) };
   }
+  const compact = valueText.match(/(?:\d+\s*unit\s*)?(\d+)\s*(?:ch|channel)?\s*[*x]\s*(\d+)\s*-?bit/i);
+  if (compact) return { channels: Number(compact[1]), resolution: Number(compact[2]) };
   const channel = valueText.match(/(?:channel|通道)\s*(?:x|×)?\s*(\d+)/i);
   const bits = valueText.match(/(\d+)\s*-?bit/i);
   return { channels: channel ? Number(channel[1]) : null, resolution: bits ? Number(bits[1]) : null };
@@ -570,53 +592,157 @@ function parseHoltek(fileName) {
   return records;
 }
 
+function lifecycleFromStatus(value) {
+  const status = raw(value).toLowerCase();
+  if (/nrnd|not recommended/.test(status)) return 'nrnd';
+  if (/obsolete|eol|discontinued/.test(status)) return 'obsolete';
+  return 'active';
+}
+
 function parseNuvoton(fileName) {
   const filePath = path.join(officialDir, fileName);
-  const tables = readTable(filePath, (headers) => headers[0] === 'PartNo');
+  const tables = readTable(filePath, (headers) => headers[0] === 'PartNo' || headers[0] === 'Part No.');
   const records = [];
   for (const table of tables) {
     for (const row of table.rows) {
-      const part = first(row, 'PartNo');
+      const part = first(row, 'PartNo', 'Part No.');
       if (!clean(part)) continue;
       const rowText = Object.values(row).map(raw).join(' ');
+      const core = first(row, 'Core') || (/8051/i.test(fileName) ? '8051' : /KM101/i.test(fileName) ? '8-bit MCU' : fileName.match(/Cortex_(M0Plus|M0|M23|M33|M4|M55|M7)/i)?.[1] || 'Nuvoton MCU');
+      const minVoltage = first(row, 'Min Operating Voltage (V)', 'Operating Voltage (min)');
+      const maxVoltage = first(row, 'Max Operating Voltage (V)', 'Operating Voltage (max)');
+      const minTemperature = first(row, 'Operating Temperature (min)', 'Operating Temp. Range (°C )');
+      const maxTemperature = first(row, 'Operating Temperature (max)');
+      const packageType = first(row, 'Package Type', 'Package');
+      const packageSize = first(row, 'Package Size');
+      const flash = first(row, 'Flash', 'APROM Flash', 'APROM Flash(KB)', 'ROM Size (KB)');
+      const sram = first(row, 'SRAM', 'SRAM(KB)', 'RAM Size (KB)');
+      const frequency = first(row, 'Operating Frequency', 'Operating Frequency (MHz)', 'Max Operating Frequency (MHz)') || rowText.match(/(\d+(?:\.\d+)?)\s*MHz/i)?.[1];
       const record = createRecord({
         manufacturerId: 'nuvoton',
         partNumber: part,
-        core: 'KM103 MCU',
-        frequency: first(row, 'Max Operating Frequency (MHz)'),
-        flash: first(row, 'ROM Size (KB)'),
-        sram: first(row, 'RAM Size (KB)'),
-        voltage: `${first(row, 'Min Operating Voltage (V)')} to ${first(row, 'Max Operating Voltage (V)')}`,
-        packageValue: first(row, 'Package'),
-        gpio: first(row, 'Number of I/O Ports (channel)'),
+        core,
+        frequency,
+        flash,
+        sram: /^\d/.test(raw(sram)) && /[+]/.test(raw(sram)) ? memoryKb(sram) : sram,
+        voltage: minVoltage || maxVoltage ? `${minVoltage || ''} to ${maxVoltage || ''}` : '',
+        temperature: maxTemperature ? `${minTemperature || ''} to ${maxTemperature}` : minTemperature,
+        packageValue: packageSize ? `${packageType || ''} ${packageSize}` : packageType,
+        gpio: first(row, 'GPIO', 'I/O', 'Number of I/O Ports (channel)'),
+        description: first(row, 'Applications', 'Product Family'),
         sourceName: `官方数据/${fileName}`,
-        sourceNote: 'Nuvoton 官方 KM103 选型表导入；同步串行接口按 SPI 类接口记录，复位和内部振荡器按原始列映射。',
-        productUrl: 'https://www.nuvoton.com/products/microcontrollers/arm-cortex-m0-mcus/',
-        datasheetUrl: 'https://www.nuvoton.com/products/microcontrollers/arm-cortex-m0-mcus/'
+        sourceNote: 'Nuvoton 官方选型表导入；不同系列采用同语义字段映射，未提供的型号级参数保留为空。',
+        productUrl: 'https://www.nuvoton.com/products/microcontrollers/',
+        datasheetUrl: 'https://www.nuvoton.com/products/microcontrollers/'
       });
-      record.architecture = 'other';
-      record.fpu = false;
-      record.pin_count = countValue(first(row, 'Pin Count')) || parsePinCount(first(row, 'Package'));
+      record.lifecycle_status = lifecycleFromStatus(first(row, 'Status', 'Mass Production'));
+      record.pin_count = countValue(first(row, 'Pin Count')) || parsePinCount(packageType);
+      record.fpu = /M4|M7|M55/i.test(raw(core)) ? true : /8051|M0|M23/i.test(raw(core)) ? false : null;
+      record.timer_count = parseTimerTotal(first(row, 'Timer', 'Timer(32N/Abit)', '16-bit Timer (channel)', '8-bit Timer (channel)'));
       record.timer_16bit_count = countValue(first(row, '16-bit Timer (channel)'));
       record.timer_basic_count = countValue(first(row, '8-bit Timer (channel)'));
-      record.pwm_channel_count = countValue(first(row, 'PWM (channel)'));
-      record.spi_count = countValue(first(row, 'Serial I/F [Clock Synchronous] (channel)'));
-      record.uart_count = countValue(first(row, 'Serial I/F [UART] (channel)'));
-      record.i2c_count = countValue(first(row, 'Serial I/F [I2C] (channel)'));
-      record.can_count = countValue(first(row, 'Serial I/F [CAN] (channel)'));
-      const adc10 = countValue(first(row, 'ADC [10bit] (channel)'));
-      const adc12 = countValue(first(row, 'ADC [12bit] (channel)'));
-      record.adc_channel_count = adc12 ?? adc10;
-      record.adc_resolution_bits = adc12 === null ? (adc10 === null ? null : 10) : 12;
-      record.opamp_count = countValue(first(row, 'Op Amp'));
+      record.pwm_channel_count = countValue(first(row, 'PWM (channel)', 'PWM'));
+      record.spi_count = countValue(first(row, 'SPI', 'Serial I/F [Clock Synchronous] (channel)', 'SPI/I²S+LPSPI', 'SPI/I²S'));
+      record.i2c_count = countValue(first(row, 'I2C', 'I²C', 'I²C + LPI²C', 'Serial I/F [I2C] (channel)'));
+      record.i2s_count = countValue(first(row, 'I²S', 'I2S/ AC97', 'SPI/I²S'));
+      record.uart_count = countValue(first(row, 'UART', 'UART + LPUART', 'Serial I/F [UART] (channel)'));
+      record.can_count = countValue(first(row, 'CAN', 'CAN FD', 'Serial I/F [CAN] (channel)'));
+      record.qspi_count = countValue(first(row, 'Quad SPI', 'QSPI'));
+      record.usb_device_count = countValue(first(row, 'USB Device', 'USB HS + FS', 'USB'));
+      record.usb = featureValue(first(row, 'USB Device', 'USB HS + FS', 'USB'));
+      record.sdio = featureValue(first(row, 'SD Host'));
+      record.ethernet = featureValue(first(row, 'Ethernet MAC', 'Ethernet 10/100'));
+      const adcName = ['ADC', 'EADC(12N/Abit)', 'LPADC(12N/Abit)', 'ADC [10bit] (channel)', 'ADC [12bit] (channel)'].find((name) => Object.prototype.hasOwnProperty.call(row, name)) || '';
+      const adcText = first(row, adcName);
+      const adc = adcValues(adcText);
+      record.adc_channel_count = adc.channels ?? countValue(adcText);
+      record.adc_resolution_bits = adc.resolution || (/10bit|10n/i.test(`${adcName} ${raw(adcText)}`) ? 10 : /12bit|12n/i.test(`${adcName} ${raw(adcText)}`) ? 12 : null);
+      record.dac_channel_count = countValue(first(row, 'DAC', 'DAC [8bit] (channel)', 'DAC(12N/Abit)'));
+      record.comparator_count = countValue(first(row, 'Comparator', 'Analog Comparator'));
+      record.opamp_count = countValue(first(row, 'Op Amp', 'OP Amp.', 'Op amp', 'OPA'));
       record.internal_opamp = record.opamp_count === null ? null : record.opamp_count > 0;
-      record.comparator_count = countValue(first(row, 'Comparator'));
-      record.interrupt_source_count = countValue(first(row, 'Interrupt Sources (channel)'));
-      record.internal_oscillator = featureValue(first(row, 'High Speed On Chip Oscillator Frequency (MHz)'));
+      record.touch_key_channel_count = countValue(first(row, 'Touch Key'));
+      record.audio = featureValue(first(row, 'Audio Codec', 'Audio Mic.', 'Audio Speaker', 'DMIC(4-ch)'));
+      record.lcd_seg_count = countValue(first(row, 'LCD [SEG] (channel)'));
+      record.lcd_com_count = countValue(first(row, 'LCD [COM] (channel)'));
+      record.rtc = featureValue(first(row, 'RTC', 'RTC(Vbat)'));
+      record.interrupt_source_count = countValue(first(row, 'Interrupt Sources (channel)', 'INT'));
+      record.internal_oscillator = featureValue(first(row, 'High Speed On Chip Oscillator Frequency (MHz)', 'Low Speed On Chip Oscillator Frequency (kHz) ', 'IRC'));
       record.reset_method = clean(first(row, 'Power On Reset'));
       record.watchdog = countValue(first(row, 'Watch Dog Timer (channel)')) > 0;
-      record.ethernet = null;
-      record.audio = /audio|voice/i.test(rowText) ? true : null;
+      record.infrared = /infrared|ir remote/i.test(rowText) ? true : null;
+      record.key_scan = /key\s*scan|keyscan/i.test(rowText) ? true : null;
+      records.push(record);
+    }
+  }
+  return records;
+}
+
+function parsePuya(fileName) {
+  const filePath = path.join(officialDir, fileName);
+  const tables = readTable(filePath, (headers) => headers[0] === 'Part No.');
+  const records = [];
+  for (const table of tables) {
+    for (const row of table.rows) {
+      const part = first(row, 'Part No.');
+      if (!clean(part)) continue;
+      const core = first(row, 'Core');
+      const packageType = first(row, 'Package Type');
+      const packageSize = first(row, 'Package Size(mm)');
+      const record = createRecord({
+        manufacturerId: 'puya',
+        partNumber: part,
+        core,
+        frequency: first(row, 'Max CLK（MHz）'),
+        flash: first(row, 'Flash（KB）'),
+        sram: first(row, 'SRAM（KB）'),
+        packageValue: packageSize ? `${packageType || ''} ${packageSize}` : packageType,
+        gpio: first(row, 'I/Os'),
+        temperature: first(row, 'Operation Temp. （℃）'),
+        sourceName: `官方数据/${fileName}`,
+        sourceNote: 'Puya 官方 PY32 选型表导入；封装类型和封装尺寸保留在封装字段。',
+        productUrl: 'https://www.puyasemi.com/',
+        datasheetUrl: 'https://www.puyasemi.com/'
+      });
+      record.lifecycle_status = lifecycleFromStatus(first(row, 'Status'));
+      record.fpu = /f$/i.test(raw(core)) ? true : null;
+      record.timer_16bit_count = countValue(first(row, 'GPTM'));
+      record.timer_motor_control_count = countValue(first(row, 'ADTM'));
+      record.timer_basic_count = countValue(first(row, 'Basic TM'));
+      record.timer_low_power_count = countValue(first(row, 'LPTIMER'));
+      record.timer_count = [record.timer_16bit_count, record.timer_motor_control_count, record.timer_basic_count, record.timer_low_power_count]
+        .filter((value) => value !== null).reduce((sum, value) => sum + value, 0);
+      record.systick = booleanValue(first(row, 'Systic'));
+      record.watchdog = featureValue(first(row, 'WDG'));
+      record.rtc = featureValue(first(row, 'RTC'));
+      record.pwm_channel_count = countValue(first(row, 'PWM CHs', 'EPWM / CHs'));
+      record.usart_count = countValue(first(row, 'USART'));
+      record.uart_count = countValue(first(row, 'UART'));
+      record.lpuart_count = countValue(first(row, 'LPUART'));
+      record.i2c_count = countValue(first(row, 'I2C'));
+      record.spi_count = countValue(first(row, 'SPI'));
+      record.i2s_count = countValue(first(row, 'I2S'));
+      record.ethernet = featureValue(first(row, '10/100 ETH'));
+      record.usb_device_count = featureValue(first(row, 'USB')) ? 1 : 0;
+      record.usb = featureValue(first(row, 'USB'));
+      record.can_count = /\bCAN\b/i.test(raw(first(row, 'CAN'))) ? 1 : 0;
+      record.segment_lcd = featureValue(first(row, 'LCDC', 'LCD'));
+      record.sdio = featureValue(first(row, 'SDIO'));
+      record.qspi_count = countValue(first(row, 'ESMC'));
+      record.math_accelerator = featureValue(first(row, 'Cordic'));
+      record.crypto_accelerator = featureValue(first(row, 'AES RNG'));
+      const adcText = first(row, '12bit ADC Units(CHs)');
+      record.adc_12bit_cell_count = countValue(adcText);
+      record.adc_12bit_channel_count = maxCount(adcText);
+      record.adc_channel_count = record.adc_12bit_channel_count;
+      record.adc_resolution_bits = 12;
+      record.dac_12bit_cell_count = countValue(first(row, '12bit DAC Units(CHs)'));
+      record.dac_channel_count = maxCount(first(row, '12bit DAC Units(CHs)'));
+      record.comparator_count = countValue(first(row, 'CMP'));
+      record.opamp_count = countValue(first(row, 'OPA/PGA'));
+      record.internal_opamp = record.opamp_count === null ? null : record.opamp_count > 0;
+      record.audio = /audio|voice/i.test(Object.values(row).map(raw).join(' ')) ? true : null;
+      record.infrared = /infrared|ir remote/i.test(Object.values(row).map(raw).join(' ')) ? true : null;
       records.push(record);
     }
   }
@@ -652,6 +778,7 @@ function importerFor(format) {
   if (format === 'geehy') return parseGeehy;
   if (format === 'holtek') return parseHoltek;
   if (format === 'nuvoton') return parseNuvoton;
+  if (format === 'puya') return parsePuya;
   throw new Error(`未知导入格式：${format}`);
 }
 
@@ -681,7 +808,8 @@ const manufacturerRows = readCsv(path.join(sourceDir, 'manufacturers.csv')).rows
 const additions = [
   ['artery', 'Artery Technology', 'Artery', 'https://www.arterytek.com/', 'true'],
   ['holtek', 'Holtek Semiconductor', 'Holtek', 'https://www.holtek.com/', 'true'],
-  ['nuvoton', 'Nuvoton Technology', 'Nuvoton', 'https://www.nuvoton.com/', 'true']
+  ['nuvoton', 'Nuvoton Technology', 'Nuvoton', 'https://www.nuvoton.com/', 'true'],
+  ['puya', 'Puya Semiconductor', 'Puya', 'https://www.puyasemi.com/', 'true']
 ].map((values) => Object.fromEntries(manufacturerHeaders.map((header, index) => [header, values[index]])));
 const manufacturerById = new Map(manufacturerRows.map((row) => [row.manufacturer_id, row]));
 for (const row of additions) if (!manufacturerById.has(row.manufacturer_id)) manufacturerById.set(row.manufacturer_id, row);

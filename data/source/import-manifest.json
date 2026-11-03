@@ -26,7 +26,24 @@
         {"path": "官方数据/Nuvoton_32bit_KM103_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"}
       ]
     },
-    {"batch": 2, "status": "pending", "review_status": "not_started", "files": ["Nuvoton remaining selection guides", "Puya_PY32_Product_Selection.xls"]},
+    {
+      "batch": 2,
+      "status": "imported",
+      "record_count": 965,
+      "review_status": "automated_mapping_complete_manual_review_pending",
+      "files": [
+        {"path": "官方数据/Nuvoton_8bit_8051_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_8bit_KM101_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_Arm_Cortex_M0Plus_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_Arm_Cortex_M0_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_Arm_Cortex_M23_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_Arm_Cortex_M33_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_Arm_Cortex_M4_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_Arm_Cortex_M55_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Nuvoton_Arm_Cortex_M7_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
+        {"path": "官方数据/Puya_PY32_Product_Selection.xls", "manufacturer": "puya", "parser": "puya", "format": "xls"}
+      ]
+    },
     {"batch": 3, "status": "pending", "review_status": "not_started", "files": ["WCH_MCU_Selection.xlsx", "all nine PDF sources"]},
     {"batch": 4, "status": "pending", "review_status": "not_started", "files": ["first ten HTML sources"]},
     {"batch": 5, "status": "pending", "review_status": "not_started", "files": ["next ten HTML sources"]},
