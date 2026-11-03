@@ -1,3 +1,4 @@
 tmp/
+node_modules/
 data/generated/*.json
 site/data/*.json

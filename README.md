@@ -1,10 +1,10 @@
 # MCU Selection Tool
 
-This repository will contain the public MCU parameter catalog and the static selection tool.
+This repository contains the public MCU parameter catalog and the static selection tool.
 
 ## Current status
 
-The data model and maintenance workflow are defined. The source catalog is intentionally empty until each part number has been checked against an official product page and datasheet.
+The catalog contains imported APM32 and STM32 selection-guide records. The static page supports direct checkbox filters, sorting, pagination and CSV export.
 
 ## Documentation
 
@@ -14,4 +14,4 @@ The data model and maintenance workflow are defined. The source catalog is inten
 
 ## Source data
 
-Edit files under `data/source/` only. Generated web data will be created later by the publishing workflow.
+Edit files under `data/source/` only. After installing dependencies with `npm ci`, import the two local official workbooks with `npm run import:official`, then run `npm run build:data`. Generated web data is created by the publishing workflow.
