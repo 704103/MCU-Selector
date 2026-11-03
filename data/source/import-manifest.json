@@ -260,7 +260,7 @@
           "manufacturer": "bouffalolab",
           "parser": "html-bouffalolab",
           "format": "html",
-          "record_count": 13
+          "record_count": 7
         },
         {
           "path": "官方数据/ChipON_KF32_Product_Selection.html",
@@ -317,7 +317,7 @@
           "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
         }
       ],
-      "record_count": 388
+      "record_count": 382
     },
     {
       "batch": 5,

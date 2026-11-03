@@ -1437,7 +1437,7 @@ function parseHtmlBouffalolab(fileName) {
   const seen = new Set();
   for (const label of [...labels, ...links]) {
     for (const part of expandHtmlModels(label)) {
-      if (!/^BL\d+/i.test(part) || seen.has(part)) continue;
+      if (!/^BL\d+[A-Z]?$/i.test(part) || seen.has(part)) continue;
       seen.add(part);
       records.push(createHtmlRecord({ manufacturerId: 'bouffalolab', fileName, partNumber: part, context: label, core: 'RISC-V', productUrl: htmlProductUrls.bouffalolab, description: '无线连接 SoC 产品页' }));
     }
@@ -1643,10 +1643,12 @@ for (const [fileName, manufacturerId, format] of selectedFiles) {
 }
 
 const importedKeys = new Set(importedByKey.keys());
+const selectedSourceNames = new Set(selectedFiles.map(([fileName]) => `官方数据/${fileName}`));
 const retainedRows = existingRows
   .filter((row) => {
     const key = `${row.manufacturer_id}|${row.part_number.toUpperCase()}`;
     if (importedKeys.has(key)) return false;
+    if (selectedSourceNames.has(row.source_name)) return false;
     if (row.manufacturer_id === 'essemi' && importedKeys.has(`essemi|${normalizeEssemiPart(row.part_number)}`)) return false;
     return true;
   })
