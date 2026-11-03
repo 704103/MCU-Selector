@@ -46,6 +46,52 @@ const batches = {
     ['Megawin_2026_MCU_Selection_Table_SC.pdf', 'megawin', 'pdf-family-overview'],
     ['Megawin_2026_Product_Manual_SC.pdf', 'megawin', 'pdf-family-overview'],
     ['Synwit_SWM_MCU_Catalog.pdf', 'synwit', 'synwit-ocr']
+  ],
+  '4': [
+    ['APT_APT32_Product_Selection.html', 'apt', 'html-family-only'],
+    ['Bluetrum_Wireless_MCU_Product_Selection.html', 'bluetrum', 'html-bluetrum'],
+    ['BouffaloLab_Wireless_MCU_Product_Selection.html', 'bouffalolab', 'html-bouffalolab'],
+    ['ChipON_KF32_Product_Selection.html', 'chipon', 'html-family-only'],
+    ['ENE_Product_Catalog.html', 'ene', 'html-family-only'],
+    ['Espressif_ESP32_SoC_Product_Selection.html', 'espressif', 'html-espressif'],
+    ['FudanMicro_Product_Catalog.html', 'fudan', 'html-family-only'],
+    ['Generalplus_MCU_Product_Selection.html', 'generalplus', 'html-generalplus'],
+    ['Hangshun_HK32_Product_Selection.html', 'hangshun', 'html-family-only'],
+    ['HDSC_MCU_Product_Selection.html', 'hdsc', 'html-family-only']
+  ],
+  '5': [
+    ['HPMicro_HPM5300_Selection_Table.html', 'hpmicro', 'html-hpmicro'],
+    ['HPMicro_HPM6200_Selection_Table.html', 'hpmicro', 'html-hpmicro'],
+    ['HPMicro_HPM6300_Selection_Table.html', 'hpmicro', 'html-hpmicro'],
+    ['HPMicro_HPM6700_6400_Selection_Table.html', 'hpmicro', 'html-hpmicro'],
+    ['HPMicro_HPM6800_Selection_Table.html', 'hpmicro', 'html-hpmicro'],
+    ['HPMicro_HPM6E00_Selection_Table.html', 'hpmicro', 'html-hpmicro'],
+    ['ITE_Selection_Guide.html', 'ite', 'html-family-only'],
+    ['Nationz_N32_Product_Selection.html', 'nationz', 'html-family-only'],
+    ['Nyquest_32bit_MCU_Product_Selection.html', 'nyquest', 'html-family-only'],
+    ['Nyquest_IC_Product_Download.html', 'nyquest', 'html-family-only']
+  ],
+  '6': [
+    ['PADAUK_MCU_Product_Selection.html', 'padauk', 'html-padauk'],
+    ['Princeton_MCU_Product_Selection.html', 'princeton', 'html-princeton'],
+    ['Realtek_Product_Selection.html', 'realtek', 'html-family-only'],
+    ['ShanghaiBelling_MCU_Product_Catalog.html', 'belling', 'html-family-only'],
+    ['Silan_MCU_Product_Catalog.html', 'silan', 'html-family-only'],
+    ['SinoWealth_Product_Catalog.html', 'sinowealth', 'html-family-only'],
+    ['SocyMicro_Product_Selection.html', 'socymicro', 'html-family-only'],
+    ['Sonix_MCU_Product_Selection.html', 'sonix', 'html-family-only'],
+    ['STC_MCU_Product_Selection.html', 'stc', 'html-family-only'],
+    ['Sunplus_Product_Catalog.html', 'sunplus', 'html-family-only']
+  ],
+  '7': [
+    ['SyncMOS_MCU_Product_Selection.html', 'syncmos', 'html-syncmos'],
+    ['Synwit_SWM_MCU_Product_Selection.html', 'synwit', 'html-family-only'],
+    ['Weltrend_English_Product_Selection.html', 'weltrend', 'html-family-only'],
+    ['Weltrend_Product_Selection.html', 'weltrend', 'html-family-only'],
+    ['WinnerMicro_W806_MCU_Product_Catalog.html', 'winnermicro', 'html-winnermicro'],
+    ['Wuxin_CW32_MCU_Product_Selection.html', 'wuxin', 'html-family-only'],
+    ['XHSC_Product_Line.html', 'xhsc', 'html-family-only'],
+    ['Yichip_Wireless_MCU_Product_Catalog.html', 'yichip', 'html-family-only']
   ]
 };
 
@@ -164,6 +210,17 @@ function brandFor(manufacturerId, partNumber) {
   const part = raw(partNumber).toUpperCase();
   if (manufacturerId === 'artery') return 'AT32';
   if (manufacturerId === 'geehy') return part.startsWith('G32') ? 'G32' : part.startsWith('GW') ? 'GW' : 'APM32';
+  if (manufacturerId === 'espressif') return part.startsWith('ESP8266') ? 'ESP8266' : 'ESP32';
+  const brands = {
+    apt: 'APT32', bluetrum: 'Bluetrum', bouffalolab: 'Bouffalo Lab', chipon: 'ChipON',
+    ene: 'ENE', espressif: 'ESP32', fudan: 'Fudan Micro', generalplus: 'Generalplus',
+    hangshun: 'HK32', hdsc: 'HC32', hpmicro: 'HPMicro', ite: 'ITE', nyquest: 'Nyquest',
+    padauk: 'PADAUK', princeton: 'Princeton', realtek: 'Realtek', belling: 'Belling',
+    silan: 'Silan', sinowealth: 'Sino Wealth', socymicro: 'SocyMicro', sonix: 'Sonix',
+    stc: 'STC', sunplus: 'Sunplus', syncmos: 'SyncMOS', synwit: 'Synwit',
+    weltrend: 'Weltrend', winnermicro: 'WinnerMicro', wuxin: 'CW32', xhsc: 'XHSC', yichip: 'Yichip'
+  };
+  if (brands[manufacturerId]) return brands[manufacturerId];
   if (manufacturerId === 'holtek') return 'Holtek';
   if (manufacturerId === 'nuvoton') return 'Nuvoton';
   return manufacturerId.toUpperCase();
@@ -1173,6 +1230,349 @@ function parseSynwit(fileName) {
   });
 }
 
+function decodeHtml(value) {
+  return raw(value)
+    .replace(/&nbsp;|&#160;|&#xA0;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;|&#39;/gi, "'")
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, number) => String.fromCodePoint(Number(number)));
+}
+
+function htmlText(value) {
+  return decodeHtml(value)
+    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<br\s*\/?\s*>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[\u0000-\u001f]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function htmlAttribute(attributes, name) {
+  const match = raw(attributes).match(new RegExp(`${name}\\s*=\\s*["']([^"']*)["']`, 'i'));
+  return match ? decodeHtml(match[1]) : '';
+}
+
+function htmlLinks(html) {
+  const links = [];
+  for (const match of html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
+    const href = htmlAttribute(match[1], 'href');
+    const label = htmlText(match[2]);
+    if (href && label) links.push({ href, label, html: match[2] });
+  }
+  return links;
+}
+
+function htmlTables(html) {
+  const tables = [];
+  for (const tableMatch of html.matchAll(/<table\b[^>]*>([\s\S]*?)<\/table>/gi)) {
+    const rows = [];
+    for (const rowMatch of tableMatch[1].matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)) {
+      const cells = [];
+      for (const cellMatch of rowMatch[1].matchAll(/<(th|td)\b([^>]*)>([\s\S]*?)<\/\1>/gi)) {
+        cells.push({
+          tag: cellMatch[1].toLowerCase(),
+          className: htmlAttribute(cellMatch[2], 'class'),
+          text: htmlText(cellMatch[3]),
+          html: cellMatch[3]
+        });
+      }
+      if (cells.length) rows.push(cells);
+    }
+    if (rows.length) tables.push({ rows });
+  }
+  return tables;
+}
+
+function htmlCell(row, className) {
+  return row.find((cell) => cell.className.split(/\s+/).includes(className)) || null;
+}
+
+function expandHtmlModels(value) {
+  const text = htmlText(value).toUpperCase().replace(/[：:]/g, ' ').trim();
+  if (!text) return [];
+  const pieces = text.split(/\s*[/,;|]\s*/).map((item) => item.trim()).filter(Boolean);
+  const models = [];
+  for (let index = 0; index < pieces.length; index += 1) {
+    let candidate = pieces[index].replace(/^[(*]+|[),.;]+$/g, '').trim();
+    if (index > 0 && /^[A-Z]?\d+$/.test(candidate)) {
+      const prefix = pieces[0].match(/^[A-Z]+/i)?.[0] || '';
+      candidate = `${prefix}${candidate}`;
+    } else if (index > 0 && /^[A-Z]$/.test(candidate) && /[A-Z]$/i.test(pieces[0])) {
+      candidate = `${pieces[0].slice(0, -1)}${candidate}`;
+    }
+    if (/^(?=[A-Z0-9-]{3,36}$)(?=.*\d)[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*$/i.test(candidate) &&
+      !/^(?:HTTP|HTTPS|UTF|HTML|WIDTH|HEIGHT|CLASS|STYLE|SCRIPT|PRODUCT|MODEL|PART|FLASH|RAM|GPIO|MCU|CPU|CORTEX|ARM|USB|UART|SPI|I2C|JSON|API|TRUE|FALSE|N\/A)$/i.test(candidate)) {
+      models.push(candidate);
+    }
+  }
+  return [...new Set(models)];
+}
+
+function htmlWindow(html, offset, size = 1800) {
+  return html.slice(Math.max(0, offset - size), Math.min(html.length, offset + size));
+}
+
+function htmlNumberWithUnit(value, unit) {
+  const number = numberValue(value);
+  if (number === null) return null;
+  return /^mb?$/i.test(unit) ? number * 1024 : /^b$/i.test(unit) ? number / 1024 : number;
+}
+
+function htmlCapacity(text, labels) {
+  const labelPattern = labels.join('|');
+  const patterns = [
+    new RegExp(`(?:${labelPattern})[^\\d]{0,40}(\\d+(?:\\.\\d+)?)\\s*(KB|K|MB|B)`, 'i'),
+    new RegExp(`(\\d+(?:\\.\\d+)?)\\s*(KB|K|MB|B)[^\\n]{0,40}(?:${labelPattern})`, 'i')
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) return htmlNumberWithUnit(match[1], match[2]);
+  }
+  return null;
+}
+
+function htmlFrequency(text) {
+  const match = text.match(/(?:up to|max(?:imum)?|frequency|clock)[^\d]{0,35}(\d+(?:\.\d+)?)\s*(?:MHz|Mhz|mhz)/i) || text.match(/(\d+(?:\.\d+)?)\s*MHz/i);
+  return match ? Number(match[1]) : null;
+}
+
+function htmlCore(text, fallback = 'unknown') {
+  if (/risc[- ]?v/i.test(text)) return 'RISC-V';
+  const cortex = text.match(/Cortex[- ]?M\d+\+?/i);
+  if (cortex) return cortex[0].replace(/\s+/g, '-');
+  if (/\b8051\b/i.test(text)) return '8051';
+  if (/8\s*[- ]?bit|8位/i.test(text)) return '8-bit MCU';
+  if (/32\s*[- ]?bit|32位/i.test(text)) return '32-bit MCU';
+  return fallback;
+}
+
+function absoluteHtmlUrl(value, baseUrl) {
+  const url = clean(value);
+  if (!url) return baseUrl;
+  try {
+    return new URL(url, baseUrl).href;
+  } catch {
+    return baseUrl;
+  }
+}
+
+function createHtmlRecord({ manufacturerId, fileName, partNumber, context, productUrl, datasheetUrl, core, flash, sram, gpio, packageValue, description = '' }) {
+  const sourceText = htmlText(context);
+  const sourceName = `官方数据/${fileName}`;
+  const officialUrl = productUrl || htmlProductUrls[manufacturerId] || 'https://www.example.com/';
+  const voltage = sourceText.match(/(?:VDD|voltage|电压)[^\d]{0,20}(\d+(?:\.\d+)?\s*(?:to|~|-)\s*\d+(?:\.\d+)?)/i)?.[1];
+  const temperature = /temperature|temp\.?|工作温度|℃|°C/i.test(sourceText)
+    ? sourceText.match(/(-?\d+(?:\.\d+)?)\s*(?:to|~|-)\s*(-?\d+(?:\.\d+)?)\s*°?C/i)?.[0]
+    : null;
+  const record = createRecord({
+    manufacturerId,
+    partNumber,
+    core: core || htmlCore(sourceText),
+    frequency: htmlFrequency(sourceText),
+    flash: flash ?? htmlCapacity(sourceText, ['flash', 'program memory', 'code memory', '程序存储']),
+    sram: sram ?? htmlCapacity(sourceText, ['sram', 'ram', 'data memory', '数据存储']),
+    voltage,
+    temperature,
+    packageValue: packageValue || sourceText.match(/\b(?:LQFP|QFN|BGA|TSSOP|SOP|SSOP|DIP|QFP|WLCSP)[ -]?\d+[A-Z0-9-]*\b/i)?.[0] || '',
+    gpio: gpio ?? sourceText.match(/(?:GPIO|I\/O|IO)[^\d]{0,15}(\d+)/i)?.[1],
+    sourceName,
+    sourceNote: `${manufacturerId} 官方 HTML 产品页离线快照导入；仅映射页面可直接确认的型号级字段，未提供的参数保留为空。`,
+    productUrl: absoluteHtmlUrl(officialUrl, htmlProductUrls[manufacturerId] || officialUrl),
+    datasheetUrl: absoluteHtmlUrl(datasheetUrl || officialUrl, htmlProductUrls[manufacturerId] || officialUrl),
+    description
+  });
+  record.rf = /wireless|wi-?fi|bluetooth|\bble\b|zigbee|radio|无线|蓝牙/i.test(sourceText) ? true : null;
+  record.audio = /audio|voice|speech|music|音频|语音/i.test(sourceText) ? true : null;
+  record.touch_key_channel_count = record.touch_key_channel_count ?? maxCount(sourceText.match(/touch(?:key|sensor)?[^\d]{0,15}(\d+)/i)?.[1]);
+  record.lcd_seg_count = record.lcd_seg_count ?? maxCount(sourceText.match(/lcd[^\d]{0,10}(?:seg|segment)[^\d]{0,10}(\d+)/i)?.[1]);
+  record.internal_oscillator = /internal oscillator|internal rc|hirc|lirc|mirc|内部振荡器|内部 RC/i.test(sourceText) ? true : null;
+  record.zero_wait_flash = /0[- ]?wait|zero[- ]?wait/i.test(sourceText) ? true : null;
+  record.usb = /\bUSB\b/i.test(sourceText) ? true : null;
+  const samplePrice = sourceText.match(/sample price[^:$]*[:：]?\s*([$€£]?\s*\d+(?:\.\d+)?)/i);
+  const batchPrice = sourceText.match(/(?:bulk|batch|order in bulk)[^:：]{0,40}[:：]\s*([^.;]{1,80})/i);
+  if (samplePrice) record.sample_price = samplePrice[1].replace(/\s+/g, '');
+  if (batchPrice) record.batch_price = batchPrice[1].trim();
+  return record;
+}
+
+const htmlProductUrls = {
+  apt: 'https://www.aptchip.com/', bluetrum: 'https://www.bluetrum.com/product/', bouffalolab: 'https://www.bouffalolab.com/product/',
+  chipon: 'https://www.chipon-ic.com/', ene: 'https://www.ene.com.tw/products/', espressif: 'https://www.espressif.com/en/products/socs',
+  fudan: 'https://www.fmsh.com/products.shtml', generalplus: 'https://www.generalplus.com/', hangshun: 'https://www.hsxp-hk.com/products',
+  hdsc: 'https://www.hdsc.com.cn/products/mcu', hpmicro: 'https://www.hpmicro.com/product-center/microcontroller', ite: 'https://www.ite.com.tw/tw/selection-guide',
+  nyquest: 'https://www.nyquest.com.tw/tw/product/32_Bit_MCU', padauk: 'https://www.padauk.com.tw/en/product/index.aspx',
+  princeton: 'https://www.princeton.com.tw/產品專區/MCU', realtek: 'https://www.realtek.com/', belling: 'https://www.belling.com.cn/product.html',
+  silan: 'https://www.silan.com.cn/index.php/product.html', sinowealth: 'https://www.sinowealth.com/', socymicro: 'https://www.socmcu.com/',
+  sonix: 'https://www.sonix.com.tw/en/product', stc: 'https://stcmicro.com/stcmcu.html', sunplus: 'https://www.sunplus.com/products/',
+  syncmos: 'http://www.syncmos.com/mcu.html', synwit: 'https://www.synwit.cn/Productselectiontable/', weltrend: 'https://www.weltrend.com.tw/tw/products',
+  winnermicro: 'https://www.winnermicro.com/html/1//156/248/index.html', wuxin: 'https://www.whxy.com/32weiMCU.html',
+  xhsc: 'https://www.xhsc.com.cn/产品线', yichip: 'https://www.yichip.com/'
+};
+
+function parseHtmlBluetrum(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const records = [];
+  const seen = new Set();
+  for (const link of htmlLinks(html).filter((item) => /showproduct\.php\?id=/i.test(item.href))) {
+    for (const part of expandHtmlModels(link.label)) {
+      if (seen.has(part)) continue;
+      seen.add(part);
+      records.push(createHtmlRecord({ manufacturerId: 'bluetrum', fileName, partNumber: part, context: link.label, core: 'wireless SoC', productUrl: absoluteHtmlUrl(link.href, htmlProductUrls.bluetrum), description: '蓝牙/无线音频 SoC 产品页' }));
+    }
+  }
+  return records;
+}
+
+function parseHtmlBouffalolab(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const labels = [...html.matchAll(/<dt\b[^>]*>([\s\S]*?)<\/dt>/gi)].map((match) => htmlText(match[1]));
+  const links = htmlLinks(html).filter((item) => /type=detail/i.test(item.href)).map((item) => item.label);
+  const records = [];
+  const seen = new Set();
+  for (const label of [...labels, ...links]) {
+    for (const part of expandHtmlModels(label)) {
+      if (!/^BL\d+/i.test(part) || seen.has(part)) continue;
+      seen.add(part);
+      records.push(createHtmlRecord({ manufacturerId: 'bouffalolab', fileName, partNumber: part, context: label, core: 'RISC-V', productUrl: htmlProductUrls.bouffalolab, description: '无线连接 SoC 产品页' }));
+    }
+  }
+  return records;
+}
+
+function parseHtmlEspressif(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const records = [];
+  const seen = new Set();
+  for (const table of htmlTables(html)) {
+    for (const row of table.rows) {
+      const variant = htmlCell(row, 'chip-variants');
+      if (!variant) continue;
+      const name = htmlCell(row, 'chip-name')?.text || variant.text;
+      const datasheet = htmlLinks(htmlCell(row, 'chip-datasheet')?.html || '')[0]?.href || '';
+      const context = row.map((cell) => cell.text).join(' ');
+      const flash = htmlCell(row, 'chip-flash')?.text;
+      const ram = htmlCell(row, 'chip-ram')?.text;
+      const psram = htmlCell(row, 'chip-psram')?.text;
+      const gpio = htmlCell(row, 'chip-pins')?.text;
+      const core = /ESP32-(?:C2|C3|C5|C6|C61|P4|H2|H4|H21|E22)/i.test(name) ? 'RISC-V' : 'Xtensa';
+      for (const part of expandHtmlModels(variant.text)) {
+        if (seen.has(part)) continue;
+        seen.add(part);
+        const record = createHtmlRecord({ manufacturerId: 'espressif', fileName, partNumber: part, context, core, flash: flash ? `${flash} MB` : null, sram: ram ? `${ram} KB` : null, gpio, productUrl: htmlProductUrls.espressif, datasheetUrl: datasheet, description: `${name} SoC` });
+        record.backup_sram_kb = htmlNumberWithUnit(psram, 'MB');
+        record.rf = true;
+        records.push(record);
+      }
+    }
+  }
+  return records;
+}
+
+function parseHtmlGeneralplus(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const records = [];
+  const seen = new Set();
+  for (const link of htmlLinks(html).filter((item) => /product_detail(?:$|[?#])/i.test(item.href))) {
+    for (const part of expandHtmlModels(link.label)) {
+      if (seen.has(part)) continue;
+      seen.add(part);
+      records.push(createHtmlRecord({ manufacturerId: 'generalplus', fileName, partNumber: part, context: link.label, core: /^GPM32/i.test(part) ? '32-bit MCU' : '8-bit MCU', productUrl: absoluteHtmlUrl(link.href, htmlProductUrls.generalplus), description: 'Generalplus 官方产品详情页' }));
+    }
+  }
+  return records;
+}
+
+function parseHtmlHpmicro(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const records = [];
+  const seen = new Set();
+  for (const match of html.matchAll(/data-name=["']([^"']+)["']/gi)) {
+    const part = raw(decodeHtml(match[1])).toUpperCase();
+    if (!/^HPM[A-Z0-9]{4,}$/i.test(part) || seen.has(part)) continue;
+    seen.add(part);
+    const context = htmlText(htmlWindow(html, match.index));
+    records.push(createHtmlRecord({ manufacturerId: 'hpmicro', fileName, partNumber: part, context, core: 'RISC-V', productUrl: htmlProductUrls.hpmicro, description: 'HPMicro 官方在线选型表型号' }));
+  }
+  return records;
+}
+
+function parseHtmlPadauk(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const records = [];
+  const seen = new Set();
+  for (const table of htmlTables(html)) {
+    const headerIndex = table.rows.findIndex((row) => row.some((cell) => /^product name$/i.test(cell.text)));
+    if (headerIndex < 0) continue;
+    const headers = table.rows[headerIndex].map((cell) => cell.text.toLowerCase());
+    for (const row of table.rows.slice(headerIndex + 1)) {
+      const values = Object.fromEntries(headers.map((header, index) => [header, row[index]?.text || '']));
+      const parts = expandHtmlModels(values['product name']);
+      for (const part of parts) {
+        if (seen.has(part)) continue;
+        seen.add(part);
+        const record = createHtmlRecord({ manufacturerId: 'padauk', fileName, partNumber: part, context: row.map((cell) => cell.text).join(' '), core: '8-bit MCU', sram: htmlNumberWithUnit(values['ram (byte)'], 'B'), gpio: values['io (max)'], description: values.remarks || 'PADAUK 官方 MCU 选型表型号' });
+        record.adc_channel_count = countValue(values['adc (max)']);
+        record.pwm_channel_count = countValue(values.pwm);
+        record.lcd_com_count = maxCount(values['lcd (vdd/2)']);
+        record.touch_key_channel_count = /touch/i.test(`${values['special functions']} ${values.remarks}`) ? 1 : null;
+        records.push(record);
+      }
+    }
+  }
+  return records;
+}
+
+function parseHtmlPrinceton(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const text = htmlText(html);
+  const parts = [...new Set([...text.matchAll(/\bPT(?:32X|2EX)\b/gi)].map((match) => match[0].toUpperCase()))];
+  return parts.map((part) => createHtmlRecord({ manufacturerId: 'princeton', fileName, partNumber: part, context: text, core: /PT32X/i.test(part) ? 'Cortex-M0/M4' : 'Cortex-M0', productUrl: htmlProductUrls.princeton, description: 'Princeton 官方 MCU 产品页型号' }));
+}
+
+function parseHtmlSyncmos(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const text = htmlText(html);
+  const parts = [...new Set([...text.matchAll(/\bSSU\d+[A-Z0-9]*\b/gi)].map((match) => match[0].toUpperCase()))];
+  return parts.map((part) => createHtmlRecord({ manufacturerId: 'syncmos', fileName, partNumber: part, context: text, core: '8051', productUrl: htmlProductUrls.syncmos, description: 'SyncMOS 官方 MCU 产品页型号' }));
+}
+
+function parseHtmlWinnermicro(fileName) {
+  const html = fs.readFileSync(path.join(officialDir, fileName), 'utf8');
+  const records = [];
+  const seen = new Set();
+  for (const match of html.matchAll(/class=["'][^"']*desrtitle[^"']*["'][^>]*>([\s\S]*?)<\//gi)) {
+    const part = htmlText(match[1]).match(/\bW\d+[A-Z0-9]*\b/i)?.[0]?.toUpperCase();
+    if (!part || !/^W\d+/i.test(part) || seen.has(part)) continue;
+    seen.add(part);
+    const context = htmlText(htmlWindow(html, match.index));
+    const record = createHtmlRecord({ manufacturerId: 'winnermicro', fileName, partNumber: part, context, core: '32-bit MCU', flash: /1\s*MB\s*Flash/i.test(context) ? 1024 : null, productUrl: htmlProductUrls.winnermicro, description: 'WinnerMicro 官方 MCU/SoC 产品目录型号' });
+    record.rf = true;
+    record.fpu = /浮点|floating point/i.test(context) ? true : null;
+    records.push(record);
+  }
+  return records;
+}
+
+function parseHtml(fileName, format) {
+  if (format === 'html-family-only') return [];
+  if (format === 'html-bluetrum') return parseHtmlBluetrum(fileName);
+  if (format === 'html-bouffalolab') return parseHtmlBouffalolab(fileName);
+  if (format === 'html-espressif') return parseHtmlEspressif(fileName);
+  if (format === 'html-generalplus') return parseHtmlGeneralplus(fileName);
+  if (format === 'html-hpmicro') return parseHtmlHpmicro(fileName);
+  if (format === 'html-padauk') return parseHtmlPadauk(fileName);
+  if (format === 'html-princeton') return parseHtmlPrinceton(fileName);
+  if (format === 'html-syncmos') return parseHtmlSyncmos(fileName);
+  if (format === 'html-winnermicro') return parseHtmlWinnermicro(fileName);
+  throw new Error(`未知 HTML 导入格式：${format}`);
+}
+
 function csvValue(value) {
   if (value === null || value === undefined) return '';
   const result = String(value);
@@ -1197,6 +1597,11 @@ function mergeRecord(record, existing) {
     const oldUnknown = ['package', 'package_variant'].includes(field) && /^unknown$/i.test(existingValue);
     if (!oldUnknown && (merged[field] === null || merged[field] === undefined || merged[field] === '')) merged[field] = existingValue;
   }
+  if (merged.temperature_min_c !== '' && merged.temperature_max_c !== '' &&
+    Number(merged.temperature_min_c) > Number(merged.temperature_max_c)) {
+    merged.temperature_min_c = record.temperature_min_c ?? '';
+    merged.temperature_max_c = record.temperature_max_c ?? '';
+  }
   merged.sample_price = existing.sample_price || '';
   merged.batch_price = existing.batch_price || '';
   return merged;
@@ -1216,16 +1621,20 @@ function importerFor(format) {
   if (format === 'essemi-ocr') return parseEssemi;
   if (format === 'synwit-ocr') return parseSynwit;
   if (format === 'pdf-no-text' || format === 'pdf-family-overview') return () => [];
+  if (format.startsWith('html-')) return (fileName) => parseHtml(fileName, format);
   throw new Error(`未知导入格式：${format}`);
 }
 
 const existingRows = readCsv(path.join(sourceDir, 'mcus.csv')).rows;
 const existingByKey = new Map(existingRows.map((row) => [`${row.manufacturer_id}|${row.part_number.toUpperCase()}`, row]));
 const importedByKey = new Map();
+const fileRecordCounts = new Map();
 for (const [fileName, manufacturerId, format] of selectedFiles) {
   const filePath = path.join(officialDir, fileName);
   if (!fs.existsSync(filePath)) throw new Error(`找不到官方数据文件：${filePath}`);
-  for (const record of importerFor(format)(fileName)) {
+  const records = importerFor(format)(fileName);
+  fileRecordCounts.set(fileName, records.length);
+  for (const record of records) {
     const key = `${record.manufacturer_id}|${record.part_number}`;
     if (!record.part_number) continue;
     if (importedByKey.has(key)) console.warn(`WARNING: 批次内重复型号 ${record.part_number}，保留后出现记录。`);
@@ -1258,9 +1667,56 @@ const additions = [
   ,['wch', 'Nanjing Qinheng Microelectronics', 'WCH', 'https://www.wch.cn/', 'true']
   ,['essemi', 'Eastsoft Microelectronics', 'ESSEMI', 'https://www.essemi.com/', 'true']
   ,['synwit', 'Synwit Technology', 'Synwit', 'https://www.synwit.cn/', 'true']
+  ,['apt', 'APT Microelectronics', 'APT', 'https://www.aptchip.com/', 'true']
+  ,['bluetrum', 'Bluetrum Technology', 'Bluetrum', 'https://www.bluetrum.com/', 'true']
+  ,['bouffalolab', 'Bouffalo Lab', 'Bouffalo Lab', 'https://www.bouffalolab.com/', 'true']
+  ,['chipon', 'ChipON Microelectronics', 'ChipON', 'https://www.chipon-ic.com/', 'true']
+  ,['ene', 'ENE Technology', 'ENE', 'https://www.ene.com.tw/', 'true']
+  ,['espressif', 'Espressif Systems', 'Espressif', 'https://www.espressif.com/', 'true']
+  ,['fudan', 'Fudan Microelectronics', 'Fudan Micro', 'https://www.fmsh.com/', 'true']
+  ,['generalplus', 'Generalplus Technology', 'Generalplus', 'https://www.generalplus.com/', 'true']
+  ,['hangshun', 'Hangshun Chip', 'Hangshun', 'https://www.hsxp-hk.com/', 'true']
+  ,['hdsc', 'HDSC Semiconductor', 'HDSC', 'https://www.hdsc.com.cn/', 'true']
+  ,['hpmicro', 'HPMicro', 'HPMicro', 'https://www.hpmicro.com/', 'true']
+  ,['ite', 'ITE Tech', 'ITE', 'https://www.ite.com.tw/', 'true']
+  ,['nyquest', 'Nyquest Technology', 'Nyquest', 'https://www.nyquest.com.tw/', 'true']
+  ,['padauk', 'PADAUK Technology', 'PADAUK', 'https://www.padauk.com.tw/', 'true']
+  ,['princeton', 'Princeton Technology', 'Princeton', 'https://www.princeton.com.tw/', 'true']
+  ,['realtek', 'Realtek Semiconductor', 'Realtek', 'https://www.realtek.com/', 'true']
+  ,['belling', 'Shanghai Belling', 'Belling', 'https://www.belling.com.cn/', 'true']
+  ,['silan', 'Silan Microelectronics', 'Silan', 'https://www.silan.com.cn/', 'true']
+  ,['sinowealth', 'Sino Wealth Electronic', 'Sino Wealth', 'https://www.sinowealth.com/', 'true']
+  ,['socymicro', 'SocyMicro', 'SocyMicro', 'https://www.socmcu.com/', 'true']
+  ,['sonix', 'Sonix Technology', 'Sonix', 'https://www.sonix.com.tw/', 'true']
+  ,['stc', 'STC Micro Technology', 'STC', 'https://stcmicro.com/', 'true']
+  ,['sunplus', 'Sunplus Technology', 'Sunplus', 'https://www.sunplus.com/', 'true']
+  ,['syncmos', 'SyncMOS Technologies', 'SyncMOS', 'http://www.syncmos.com/', 'true']
+  ,['weltrend', 'Weltrend Semiconductor', 'Weltrend', 'https://www.weltrend.com.tw/', 'true']
+  ,['winnermicro', 'WinnerMicro', 'WinnerMicro', 'https://www.winnermicro.com/', 'true']
+  ,['xhsc', 'XHSC Semiconductor', 'XHSC', 'https://www.xhsc.com.cn/', 'true']
+  ,['yichip', 'Yichip Technology', 'Yichip', 'https://www.yichip.com/', 'true']
 ].map((values) => Object.fromEntries(manufacturerHeaders.map((header, index) => [header, values[index]])));
 const manufacturerById = new Map(manufacturerRows.map((row) => [row.manufacturer_id, row]));
 for (const row of additions) if (!manufacturerById.has(row.manufacturer_id)) manufacturerById.set(row.manufacturer_id, row);
 writeCsv(path.join(sourceDir, 'manufacturers.csv'), manufacturerHeaders, [...manufacturerById.values()]);
+
+const manifestPath = path.join(sourceDir, 'import-manifest.json');
+if (fs.existsSync(manifestPath)) {
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const batch = manifest.batches.find((item) => String(item.batch) === String(batchNumber));
+  if (batch) {
+    batch.status = 'imported';
+    batch.record_count = importedByKey.size;
+    batch.review_status = 'automated_mapping_complete_manual_review_pending';
+    batch.files = selectedFiles.map(([fileName, manufacturerId, format]) => {
+      const recordCount = fileRecordCounts.get(fileName) || 0;
+      const entry = { path: `官方数据/${fileName}`, manufacturer: manufacturerId, parser: format, format: path.extname(fileName).slice(1).toLowerCase(), record_count: recordCount };
+      if (recordCount === 0) entry.note = 'HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。';
+      return entry;
+    });
+    manifest.checked_at = checkedAt;
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  }
+}
 
 console.log(`Batch ${batchNumber}: imported ${importedByKey.size} records from ${selectedFiles.length} official files; retained ${retainedRows.length} existing records.`);

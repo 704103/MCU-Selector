@@ -107,6 +107,22 @@ PDF 资料先使用 `pdftotext` 生成 Markdown 中间文件，再使用 `pdftop
 
 批次 3 的 PDF 资料先使用 Poppler 转换并渲染，再使用 Tesseract OCR 处理 ESSEMI 和 Synwit 的扫描表格。OCR 结果保存为 `data/source/pdf-md/` 下的 Markdown 中间文件；ESSEMI 仅导入带封装的型号行，Synwit 的型号和主要配置经过目录图片复核。GD32 家族概览、Megawin 尚未完成型号级复核的资料只登记在 `data/source/import-manifest.json`，不生成主表记录。
 
+批次 4 至批次 7 是官网 HTML 产品页。HTML 导入器按页面结构选择适配器：Espressif 读取选型表中的 PN、GPIO、RAM、Flash 和 PSRAM；Generalplus 读取产品详情链接中的型号；HPMicro 读取在线选型表的 `data-name` 型号；PADAUK 读取产品表的型号、IO、RAM、ADC 和 PWM；Bluetrum、Bouffalo Lab、Princeton、SyncMOS 和 WinnerMicro 读取产品卡片或型号文本。页面中的模块、开发板、导航项、系列名和登录后动态数据不作为订货型号。
+
+HTML 快照只有产品入口或系列导航、没有可验证的完整订货型号时，批次清单仍记录文件、厂商、解析器和 `record_count = 0`，不生成家族级假记录。后续取得可访问的型号级官方页面后，只需为对应文件增加适配器并重新执行该批次；导入器会按 `manufacturer_id + part_number` 合并并保留已有价格。
+
+HTML 批次命令：
+
+```text
+node scripts/import-official-batch.mjs 4
+node scripts/import-official-batch.mjs 5
+node scripts/import-official-batch.mjs 6
+node scripts/import-official-batch.mjs 7
+npm run build:data
+```
+
+批次 4 至 6 每批 10 个 HTML 文件，批次 7 为剩余 8 个 HTML 文件。每批完成后检查 `data/source/import-manifest.json` 的文件级数量和解析器，再提交对应批次。
+
 ## 9. 复核周期
 
 - 新增型号：合并前必须核验；

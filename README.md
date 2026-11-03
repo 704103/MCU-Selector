@@ -4,7 +4,7 @@ This repository contains the public MCU parameter catalog and the static selecti
 
 ## Current status
 
-The catalog contains imported APM32 and STM32 selection-guide records. The static page supports direct checkbox filters, sorting, pagination and CSV export.
+The catalog contains imported official MCU and SoC records from multiple mainland Chinese, Taiwanese and international manufacturers. The static page supports direct checkbox filters, sorting, pagination and CSV export.
 
 ## Documentation
 

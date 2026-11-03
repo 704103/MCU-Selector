@@ -14,16 +14,76 @@
       "record_count": 552,
       "review_status": "automated_mapping_complete_manual_review_pending",
       "files": [
-        {"path": "官方数据/Artery_AT32_MCU_Cross_Reference_Table_EN_V202011.xlsx", "manufacturer": "artery", "parser": "artery-cross-reference", "format": "xlsx"},
-        {"path": "官方数据/Geehy_APM32A_Automotive_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
-        {"path": "官方数据/Geehy_APM32_Industrial_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
-        {"path": "官方数据/Geehy_G32A_Automotive_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
-        {"path": "官方数据/Geehy_G32R4_Encoder_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
-        {"path": "官方数据/Geehy_G32R_RealTime_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
-        {"path": "官方数据/Geehy_GW_Wireless_MCU_Selection.xls", "manufacturer": "geehy", "parser": "geehy", "format": "xls"},
-        {"path": "官方数据/Holtek_32bit_MCU_Selection.xlsx", "manufacturer": "holtek", "parser": "holtek", "format": "xlsx"},
-        {"path": "官方数据/Holtek_8bit_MCU_Selection.xlsx", "manufacturer": "holtek", "parser": "holtek", "format": "xlsx"},
-        {"path": "官方数据/Nuvoton_32bit_KM103_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"}
+        {
+          "path": "官方数据/Artery_AT32_MCU_Cross_Reference_Table_EN_V202011.xlsx",
+          "manufacturer": "artery",
+          "parser": "artery-cross-reference",
+          "format": "xlsx",
+          "record_count": 187
+        },
+        {
+          "path": "官方数据/Geehy_APM32A_Automotive_MCU_Selection.xls",
+          "manufacturer": "geehy",
+          "parser": "geehy",
+          "format": "xls",
+          "record_count": 11
+        },
+        {
+          "path": "官方数据/Geehy_APM32_Industrial_MCU_Selection.xls",
+          "manufacturer": "geehy",
+          "parser": "geehy",
+          "format": "xls",
+          "record_count": 157
+        },
+        {
+          "path": "官方数据/Geehy_G32A_Automotive_MCU_Selection.xls",
+          "manufacturer": "geehy",
+          "parser": "geehy",
+          "format": "xls",
+          "record_count": 16
+        },
+        {
+          "path": "官方数据/Geehy_G32R4_Encoder_MCU_Selection.xls",
+          "manufacturer": "geehy",
+          "parser": "geehy",
+          "format": "xls",
+          "record_count": 4
+        },
+        {
+          "path": "官方数据/Geehy_G32R_RealTime_MCU_Selection.xls",
+          "manufacturer": "geehy",
+          "parser": "geehy",
+          "format": "xls",
+          "record_count": 19
+        },
+        {
+          "path": "官方数据/Geehy_GW_Wireless_MCU_Selection.xls",
+          "manufacturer": "geehy",
+          "parser": "geehy",
+          "format": "xls",
+          "record_count": 4
+        },
+        {
+          "path": "官方数据/Holtek_32bit_MCU_Selection.xlsx",
+          "manufacturer": "holtek",
+          "parser": "holtek",
+          "format": "xlsx",
+          "record_count": 80
+        },
+        {
+          "path": "官方数据/Holtek_8bit_MCU_Selection.xlsx",
+          "manufacturer": "holtek",
+          "parser": "holtek",
+          "format": "xlsx",
+          "record_count": 210
+        },
+        {
+          "path": "官方数据/Nuvoton_32bit_KM103_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls",
+          "record_count": 6
+        }
       ]
     },
     {
@@ -32,16 +92,66 @@
       "record_count": 965,
       "review_status": "automated_mapping_complete_manual_review_pending",
       "files": [
-        {"path": "官方数据/Nuvoton_8bit_8051_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_8bit_KM101_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_Arm_Cortex_M0Plus_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_Arm_Cortex_M0_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_Arm_Cortex_M23_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_Arm_Cortex_M33_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_Arm_Cortex_M4_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_Arm_Cortex_M55_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Nuvoton_Arm_Cortex_M7_MCU_Selection.xls", "manufacturer": "nuvoton", "parser": "nuvoton", "format": "xls"},
-        {"path": "官方数据/Puya_PY32_Product_Selection.xls", "manufacturer": "puya", "parser": "puya", "format": "xls"}
+        {
+          "path": "官方数据/Nuvoton_8bit_8051_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_8bit_KM101_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_Arm_Cortex_M0Plus_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_Arm_Cortex_M0_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_Arm_Cortex_M23_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_Arm_Cortex_M33_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_Arm_Cortex_M4_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_Arm_Cortex_M55_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Nuvoton_Arm_Cortex_M7_MCU_Selection.xls",
+          "manufacturer": "nuvoton",
+          "parser": "nuvoton",
+          "format": "xls"
+        },
+        {
+          "path": "官方数据/Puya_PY32_Product_Selection.xls",
+          "manufacturer": "puya",
+          "parser": "puya",
+          "format": "xls"
+        }
       ]
     },
     {
@@ -50,21 +160,403 @@
       "record_count": 330,
       "review_status": "automated_mapping_complete_manual_review_pending",
       "files": [
-        {"path": "官方数据/WCH_MCU_Selection.xlsx", "manufacturer": "wch", "parser": "wch", "format": "xlsx", "record_count": 149},
-        {"path": "官方数据/MindMotion_MM32_Product_Selection_Guide_SC.pdf", "manufacturer": "mindmotion", "parser": "mindmotion-pdf", "format": "pdf", "record_count": 89},
-        {"path": "官方数据/Nationz_N32G031_Datasheet.pdf", "manufacturer": "nationz", "parser": "nationz-n32g031-pdf", "format": "pdf", "record_count": 11},
-        {"path": "官方数据/Nationz_N32G435_Datasheet.pdf", "manufacturer": "nationz", "parser": "nationz-n32g435-pdf", "format": "pdf", "record_count": 9},
-        {"path": "官方数据/Wuxin_CW32L012_Datasheet_CN.pdf", "manufacturer": "wuxin", "parser": "wuxin-pdf", "format": "pdf", "record_count": 2},
-        {"path": "官方数据/ESSEMI_ES32_Product_Catalog.pdf", "manufacturer": "essemi", "parser": "essemi-ocr", "format": "pdf", "record_count": 39},
-        {"path": "官方数据/GD32_MCU_Selection_Guide_2025_CN.pdf", "manufacturer": "gd32", "parser": "pdf-family-overview", "format": "pdf", "record_count": 0, "note": "家族概览图，未生成精确订货型号"},
-        {"path": "官方数据/Megawin_2026_MCU_Selection_Table_SC.pdf", "manufacturer": "megawin", "parser": "pdf-family-overview", "format": "pdf", "record_count": 0, "note": "选型表版式需进一步人工复核，未生成记录"},
-        {"path": "官方数据/Megawin_2026_Product_Manual_SC.pdf", "manufacturer": "megawin", "parser": "pdf-family-overview", "format": "pdf", "record_count": 0, "note": "产品手册未直接作为精确型号来源"},
-        {"path": "官方数据/Synwit_SWM_MCU_Catalog.pdf", "manufacturer": "synwit", "parser": "synwit-ocr", "format": "pdf", "record_count": 31}
+        {
+          "path": "官方数据/WCH_MCU_Selection.xlsx",
+          "manufacturer": "wch",
+          "parser": "wch",
+          "format": "xlsx",
+          "record_count": 149
+        },
+        {
+          "path": "官方数据/MindMotion_MM32_Product_Selection_Guide_SC.pdf",
+          "manufacturer": "mindmotion",
+          "parser": "mindmotion-pdf",
+          "format": "pdf",
+          "record_count": 89
+        },
+        {
+          "path": "官方数据/Nationz_N32G031_Datasheet.pdf",
+          "manufacturer": "nationz",
+          "parser": "nationz-n32g031-pdf",
+          "format": "pdf",
+          "record_count": 11
+        },
+        {
+          "path": "官方数据/Nationz_N32G435_Datasheet.pdf",
+          "manufacturer": "nationz",
+          "parser": "nationz-n32g435-pdf",
+          "format": "pdf",
+          "record_count": 9
+        },
+        {
+          "path": "官方数据/Wuxin_CW32L012_Datasheet_CN.pdf",
+          "manufacturer": "wuxin",
+          "parser": "wuxin-pdf",
+          "format": "pdf",
+          "record_count": 2
+        },
+        {
+          "path": "官方数据/ESSEMI_ES32_Product_Catalog.pdf",
+          "manufacturer": "essemi",
+          "parser": "essemi-ocr",
+          "format": "pdf",
+          "record_count": 39
+        },
+        {
+          "path": "官方数据/GD32_MCU_Selection_Guide_2025_CN.pdf",
+          "manufacturer": "gd32",
+          "parser": "pdf-family-overview",
+          "format": "pdf",
+          "record_count": 0,
+          "note": "家族概览图，未生成精确订货型号"
+        },
+        {
+          "path": "官方数据/Megawin_2026_MCU_Selection_Table_SC.pdf",
+          "manufacturer": "megawin",
+          "parser": "pdf-family-overview",
+          "format": "pdf",
+          "record_count": 0,
+          "note": "选型表版式需进一步人工复核，未生成记录"
+        },
+        {
+          "path": "官方数据/Megawin_2026_Product_Manual_SC.pdf",
+          "manufacturer": "megawin",
+          "parser": "pdf-family-overview",
+          "format": "pdf",
+          "record_count": 0,
+          "note": "产品手册未直接作为精确型号来源"
+        },
+        {
+          "path": "官方数据/Synwit_SWM_MCU_Catalog.pdf",
+          "manufacturer": "synwit",
+          "parser": "synwit-ocr",
+          "format": "pdf",
+          "record_count": 31
+        }
       ]
     },
-    {"batch": 4, "status": "pending", "review_status": "not_started", "files": ["first ten HTML sources"]},
-    {"batch": 5, "status": "pending", "review_status": "not_started", "files": ["next ten HTML sources"]},
-    {"batch": 6, "status": "pending", "review_status": "not_started", "files": ["next ten HTML sources"]},
-    {"batch": 7, "status": "pending", "review_status": "not_started", "files": ["remaining eight HTML sources"]}
+    {
+      "batch": 4,
+      "status": "imported",
+      "review_status": "automated_mapping_complete_manual_review_pending",
+      "files": [
+        {
+          "path": "官方数据/APT_APT32_Product_Selection.html",
+          "manufacturer": "apt",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Bluetrum_Wireless_MCU_Product_Selection.html",
+          "manufacturer": "bluetrum",
+          "parser": "html-bluetrum",
+          "format": "html",
+          "record_count": 4
+        },
+        {
+          "path": "官方数据/BouffaloLab_Wireless_MCU_Product_Selection.html",
+          "manufacturer": "bouffalolab",
+          "parser": "html-bouffalolab",
+          "format": "html",
+          "record_count": 13
+        },
+        {
+          "path": "官方数据/ChipON_KF32_Product_Selection.html",
+          "manufacturer": "chipon",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/ENE_Product_Catalog.html",
+          "manufacturer": "ene",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Espressif_ESP32_SoC_Product_Selection.html",
+          "manufacturer": "espressif",
+          "parser": "html-espressif",
+          "format": "html",
+          "record_count": 53
+        },
+        {
+          "path": "官方数据/FudanMicro_Product_Catalog.html",
+          "manufacturer": "fudan",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Generalplus_MCU_Product_Selection.html",
+          "manufacturer": "generalplus",
+          "parser": "html-generalplus",
+          "format": "html",
+          "record_count": 318
+        },
+        {
+          "path": "官方数据/Hangshun_HK32_Product_Selection.html",
+          "manufacturer": "hangshun",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/HDSC_MCU_Product_Selection.html",
+          "manufacturer": "hdsc",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        }
+      ],
+      "record_count": 388
+    },
+    {
+      "batch": 5,
+      "status": "imported",
+      "review_status": "automated_mapping_complete_manual_review_pending",
+      "files": [
+        {
+          "path": "官方数据/HPMicro_HPM5300_Selection_Table.html",
+          "manufacturer": "hpmicro",
+          "parser": "html-hpmicro",
+          "format": "html",
+          "record_count": 11
+        },
+        {
+          "path": "官方数据/HPMicro_HPM6200_Selection_Table.html",
+          "manufacturer": "hpmicro",
+          "parser": "html-hpmicro",
+          "format": "html",
+          "record_count": 12
+        },
+        {
+          "path": "官方数据/HPMicro_HPM6300_Selection_Table.html",
+          "manufacturer": "hpmicro",
+          "parser": "html-hpmicro",
+          "format": "html",
+          "record_count": 11
+        },
+        {
+          "path": "官方数据/HPMicro_HPM6700_6400_Selection_Table.html",
+          "manufacturer": "hpmicro",
+          "parser": "html-hpmicro",
+          "format": "html",
+          "record_count": 14
+        },
+        {
+          "path": "官方数据/HPMicro_HPM6800_Selection_Table.html",
+          "manufacturer": "hpmicro",
+          "parser": "html-hpmicro",
+          "format": "html",
+          "record_count": 3
+        },
+        {
+          "path": "官方数据/HPMicro_HPM6E00_Selection_Table.html",
+          "manufacturer": "hpmicro",
+          "parser": "html-hpmicro",
+          "format": "html",
+          "record_count": 11
+        },
+        {
+          "path": "官方数据/ITE_Selection_Guide.html",
+          "manufacturer": "ite",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Nationz_N32_Product_Selection.html",
+          "manufacturer": "nationz",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Nyquest_32bit_MCU_Product_Selection.html",
+          "manufacturer": "nyquest",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Nyquest_IC_Product_Download.html",
+          "manufacturer": "nyquest",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        }
+      ],
+      "record_count": 62
+    },
+    {
+      "batch": 6,
+      "status": "imported",
+      "review_status": "automated_mapping_complete_manual_review_pending",
+      "files": [
+        {
+          "path": "官方数据/PADAUK_MCU_Product_Selection.html",
+          "manufacturer": "padauk",
+          "parser": "html-padauk",
+          "format": "html",
+          "record_count": 26
+        },
+        {
+          "path": "官方数据/Princeton_MCU_Product_Selection.html",
+          "manufacturer": "princeton",
+          "parser": "html-princeton",
+          "format": "html",
+          "record_count": 2
+        },
+        {
+          "path": "官方数据/Realtek_Product_Selection.html",
+          "manufacturer": "realtek",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/ShanghaiBelling_MCU_Product_Catalog.html",
+          "manufacturer": "belling",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Silan_MCU_Product_Catalog.html",
+          "manufacturer": "silan",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/SinoWealth_Product_Catalog.html",
+          "manufacturer": "sinowealth",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/SocyMicro_Product_Selection.html",
+          "manufacturer": "socymicro",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Sonix_MCU_Product_Selection.html",
+          "manufacturer": "sonix",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/STC_MCU_Product_Selection.html",
+          "manufacturer": "stc",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Sunplus_Product_Catalog.html",
+          "manufacturer": "sunplus",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        }
+      ],
+      "record_count": 28
+    },
+    {
+      "batch": 7,
+      "status": "imported",
+      "review_status": "automated_mapping_complete_manual_review_pending",
+      "files": [
+        {
+          "path": "官方数据/SyncMOS_MCU_Product_Selection.html",
+          "manufacturer": "syncmos",
+          "parser": "html-syncmos",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Synwit_SWM_MCU_Product_Selection.html",
+          "manufacturer": "synwit",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Weltrend_English_Product_Selection.html",
+          "manufacturer": "weltrend",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Weltrend_Product_Selection.html",
+          "manufacturer": "weltrend",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/WinnerMicro_W806_MCU_Product_Catalog.html",
+          "manufacturer": "winnermicro",
+          "parser": "html-winnermicro",
+          "format": "html",
+          "record_count": 2
+        },
+        {
+          "path": "官方数据/Wuxin_CW32_MCU_Product_Selection.html",
+          "manufacturer": "wuxin",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/XHSC_Product_Line.html",
+          "manufacturer": "xhsc",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        },
+        {
+          "path": "官方数据/Yichip_Wireless_MCU_Product_Catalog.html",
+          "manufacturer": "yichip",
+          "parser": "html-family-only",
+          "format": "html",
+          "record_count": 0,
+          "note": "HTML 快照仅包含动态入口、系列导航或未提供可核验的完整订货型号，未生成型号记录。"
+        }
+      ],
+      "record_count": 2
+    }
   ]
 }
