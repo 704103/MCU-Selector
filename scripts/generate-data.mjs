@@ -42,7 +42,7 @@ const catalog = mcuRows
 
 const searchIndex = catalog.map((record) => ({
   id: record.mcu_id,
-  text: [record.part_number, record.family, record.subfamily, record.description, record.manufacturer, record.core, record.package_variant]
+  text: [record.brand, record.part_number, record.family, record.subfamily, record.description, record.manufacturer, record.core, record.package_variant]
     .filter(Boolean)
     .join(' ')
     .toLowerCase()

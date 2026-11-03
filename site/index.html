@@ -62,12 +62,10 @@
     .column-title { display: block; color: #536673; font-size: 11px; font-weight: 700; line-height: 1.25; }
     .filter-none { color: #a0abb1; }
     .sort-label { color: #687984; font-size: 10px; }
-    .col-spacer { position: sticky !important; left: 0; z-index: 8 !important; width: 28px; }
-    .col-part { position: sticky !important; left: 29px; z-index: 7 !important; box-shadow: 2px 0 5px rgba(20, 45, 65, .16); }
-    .data-table thead .col-spacer { z-index: 15 !important; background: #e0e8ec; }
-    .data-table thead .col-part { z-index: 14 !important; background: #dce6eb; }
-    .data-table tbody tr:nth-child(even) .col-spacer, .data-table tbody tr:nth-child(even) .col-part { background: #f8fafb; }
-    .data-table tbody tr:hover .col-spacer, .data-table tbody tr:hover .col-part { background: #fff3e9; }
+    .col-part { --sticky-fill: #fff; position: sticky !important; left: 0; z-index: 7 !important; box-shadow: 1px 0 0 var(--sticky-fill), 4px 0 5px rgba(20, 45, 65, .16); }
+    .data-table thead .col-part { --sticky-fill: #dce6eb; z-index: 14 !important; background: #dce6eb; }
+    .data-table tbody tr:nth-child(even) .col-part { --sticky-fill: #f8fafb; background: #f8fafb; }
+    .data-table tbody tr:hover .col-part { --sticky-fill: #fff3e9; background: #fff3e9; }
 
     .part-number { color: var(--blue-700); font-weight: 800; text-decoration: underline; text-decoration-color: #a7bfce; text-underline-offset: 2px; }
     a { color: var(--blue-700); }
@@ -80,6 +78,8 @@
     .filter-options { width: 100%; height: 84px; margin: 0; overflow: auto; border: 1px solid var(--line); background: #fff; scrollbar-color: #a9b9c4 #edf1f3; }
     .filter-option { display: flex; width: max-content; min-width: 100%; align-items: flex-start; gap: 5px; padding: 3px 4px; color: #445661; cursor: pointer; font-size: 11px; line-height: 1.25; white-space: nowrap; }
     .filter-option:hover { background: var(--blue-100); }
+    .filter-option.is-unavailable { color: #9aa6ad; }
+    .filter-option input:disabled { cursor: not-allowed; }
     .filter-option input { flex: 0 0 auto; margin: 1px 0 0; }
     .text-filter { width: 100%; height: 32px; min-height: 30px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 2px; outline: 0; font-size: 11px; }
     .text-filter:focus { border-color: var(--blue-700); box-shadow: 0 0 0 2px rgba(45, 99, 135, .12); }
@@ -187,18 +187,18 @@
     }
 
     const columns = [
-      { key: "spacer", title: "", note: "", width: 28, kind: "none", sortable: false, get: () => null },
+      { key: "brand", title: "品牌", note: "产品品牌", width: 112, kind: "enum", valueType: "text", get: (record) => record.brand },
       { key: "part_number", title: "产品型号", note: "完整订货型号", width: 156, kind: "text", valueType: "text", sortGet: (record) => record.part_number, get: (record) => record.part_number },
-      { key: "core", title: "内核", note: "CPU 内核", width: 112, kind: "enum", valueType: "text", get: (record) => record.core },
+      { key: "core", title: "内核", note: "CPU 内核", width: 96, kind: "enum", valueType: "text", get: (record) => record.core },
       { key: "max_frequency_mhz", title: "主频（MHz）", note: "最高主频", width: 80, kind: "enum", valueType: "number", get: (record) => record.max_frequency_mhz },
-      { key: "flash_kb", title: "Flash（KB）", note: "程序存储容量", width: 84, kind: "enum", valueType: "number", get: (record) => record.flash_kb },
-      { key: "sram_kb", title: "SRAM（KB）", note: "运行存储容量", width: 84, kind: "enum", valueType: "number", get: (record) => record.sram_kb },
-      numberColumn("data_eeprom_bytes", "E2PROM（Bytes）", 102), booleanColumn("fpu", "FPU"),
-      { key: "voltage", title: "工作电压（V）", note: "VDD 最小值-最大值", width: 96, kind: "enum", valueType: "text", sortGet: (record) => record.vdd_min_v, get: voltageValue },
-      { key: "temperature", title: "工作温度（°C）", note: "最小值-最大值", width: 104, kind: "enum", valueType: "text", sortGet: (record) => record.temperature_max_c, get: temperatureValue },
+      { key: "flash_kb", title: "Flash（KB）", note: "程序存储容量", width: 112, kind: "enum", valueType: "number", get: (record) => record.flash_kb },
+      { key: "sram_kb", title: "SRAM（KB）", note: "运行存储容量", width: 112, kind: "enum", valueType: "number", get: (record) => record.sram_kb },
+      numberColumn("data_eeprom_bytes", "E2PROM（Bytes）", 102), booleanColumn("fpu", "FPU", 84),
+      { key: "voltage", title: "工作电压（V）", note: "VDD 最小值-最大值", width: 120, kind: "enum", valueType: "text", sortGet: (record) => record.vdd_min_v, get: voltageValue },
+      { key: "temperature", title: "工作温度（°C）", note: "最小值-最大值", width: 120, kind: "enum", valueType: "text", sortGet: (record) => record.temperature_max_c, get: temperatureValue },
       { key: "package_variant", title: "封装", note: "封装型号", width: 132, kind: "enum", valueType: "text", get: (record) => record.package_variant || record.package },
       { key: "pin_count", title: "引脚", note: "引脚数量", width: 84, kind: "enum", valueType: "number", get: (record) => record.pin_count },
-      { key: "gpio_count", title: "GPIO", note: "可用 GPIO 数量", width: 68, kind: "enum", valueType: "number", get: (record) => record.gpio_count },
+      { key: "gpio_count", title: "GPIO", note: "可用 GPIO 数量", width: 88, kind: "enum", valueType: "number", get: (record) => record.gpio_count },
       numberColumn("timer_16bit_count", "16位定时器"), numberColumn("timer_32bit_count", "32位定时器"),
       numberColumn("timer_motor_control_count", "电机控制定时器"), numberColumn("timer_basic_count", "基础定时器"),
       numberColumn("timer_low_power_count", "低功耗定时器"), numberColumn("timer_low_power_32bit_count", "低功耗32位定时器"),
@@ -234,7 +234,7 @@
       { key: "source", title: "来源", note: "官方链接", width: 136, kind: "none", sortable: false, get: () => null }
     ];
 
-    const exportColumns = columns.filter((column) => !["spacer", "source"].includes(column.key)).map((column) => [column.title, column.get]);
+    const exportColumns = columns.filter((column) => column.key !== "source").map((column) => [column.title, column.get]);
     exportColumns.push(["产品页", (record) => record.product_url], ["数据手册", (record) => record.datasheet_url]);
 
     function escapeHTML(value) {
@@ -243,7 +243,20 @@
 
     function safeURL(value) { return /^https?:\/\//i.test(value || "") ? escapeHTML(value) : "#"; }
     function isMissing(value) { return value === null || value === undefined || value === ""; }
-    function valueToken(value) { return isMissing(value) ? MISSING : String(value); }
+    function normalizeFilterValue(column, value) {
+      if (column.key === "core" && typeof value === "string") return value.replace(/^Cortex-/i, "");
+      return value;
+    }
+
+    function valueToken(value, column) {
+      value = normalizeFilterValue(column, value);
+      if (isMissing(value)) return MISSING;
+      if (column?.valueType === "number") {
+        const number = Number(value);
+        if (Number.isFinite(number)) return String(number);
+      }
+      return String(value);
+    }
 
     function displayFilterValue(column, token) {
       if (token === MISSING) return "未确认";
@@ -252,7 +265,7 @@
     }
 
     function displayCellValue(column, record) {
-      const value = column.get(record);
+      const value = normalizeFilterValue(column, column.get(record));
       if (isMissing(value)) return '<span class="unknown">-</span>';
       if (column.valueType === "boolean") return value ? '<span class="boolean-yes">有</span>' : '<span class="boolean-no">无</span>';
       return escapeHTML(value);
@@ -274,9 +287,16 @@
       return String(a).localeCompare(String(b), "zh-CN", { numeric: true, sensitivity: "base" });
     }
 
-    function filterTokens(column) {
-      const tokens = [...new Set(state.catalog.map((record) => valueToken(columnFilterValue(column, record))))];
-      return tokens.sort((left, right) => {
+    function filterOptions(column) {
+      const candidates = getFilteredRecords(column.key);
+      const counts = new Map();
+      for (const record of candidates) {
+        const token = valueToken(columnFilterValue(column, record), column);
+        counts.set(token, (counts.get(token) || 0) + 1);
+      }
+      const selected = state.filters.get(column.key) || new Set();
+      for (const token of selected) if (!counts.has(token)) counts.set(token, 0);
+      return [...counts.entries()].sort(([left], [right]) => {
         if (left === MISSING) return 1;
         if (right === MISSING) return -1;
         if (column.valueType === "number") return Number(left) - Number(right);
@@ -285,21 +305,56 @@
       });
     }
 
+    function stickyClassFor(column) {
+      if (column.key === "part_number") return "col-part";
+      return "";
+    }
+
+    function captureFilterView() {
+      const scroll = new Map([...document.querySelectorAll("#filter-row [data-filter-options]")].map((element) => [element.dataset.filterOptions, { left: element.scrollLeft, top: element.scrollTop }]));
+      const active = document.activeElement;
+      const textKey = active?.matches("input[data-text-filter]") ? active.dataset.textFilter : null;
+      return { scroll, textKey, selectionStart: active?.selectionStart ?? null, selectionEnd: active?.selectionEnd ?? null };
+    }
+
+    function restoreFilterView(view) {
+      for (const [key, position] of view.scroll) {
+        const element = document.querySelector(`[data-filter-options="${key}"]`);
+        if (element) {
+          element.scrollLeft = position.left;
+          element.scrollTop = position.top;
+        }
+      }
+      if (!view.textKey) return;
+      const input = [...document.querySelectorAll("input[data-text-filter]")].find((item) => item.dataset.textFilter === view.textKey);
+      if (!input) return;
+      input.focus();
+      if (view.selectionStart !== null) input.setSelectionRange(view.selectionStart, view.selectionEnd);
+    }
+
     function renderHeader() {
+      const view = captureFilterView();
       $("column-widths").innerHTML = columns.map((column) => `<col style="width:${column.width}px">`).join("");
-      $("title-row").innerHTML = columns.map((column) => `<th class="${column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : ""}" scope="col"><span class="column-title">${escapeHTML(column.title || "")}</span></th>`).join("");
+      $("title-row").innerHTML = columns.map((column) => `<th class="${stickyClassFor(column)}" scope="col"><span class="column-title">${escapeHTML(column.title || "")}</span></th>`).join("");
       $("filter-row").innerHTML = columns.map((column) => {
-        const stickyClass = column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : "";
+        const stickyClass = stickyClassFor(column);
         if (column.kind === "none") return `<th class="${stickyClass}" scope="col"><span class="filter-none">-</span></th>`;
-        if (column.kind === "text") return `<th class="${stickyClass}" scope="col"><div class="filter-control"><input class="text-filter" data-text-filter="${column.key}" type="search" placeholder="输入关键词"></div></th>`;
-        const options = filterTokens(column).map((token) => `<label class="filter-option"><input type="checkbox" data-filter-key="${escapeHTML(column.key)}" value="${escapeHTML(token)}"> <span>${escapeHTML(displayFilterValue(column, token))}</span></label>`).join("") || '<span class="filter-empty">没有可选项</span>';
-        return `<th class="${stickyClass}" scope="col"><div class="filter-control"><div class="filter-options">${options}</div></div></th>`;
+        if (column.kind === "text") return `<th class="${stickyClass}" scope="col"><div class="filter-control"><input class="text-filter" data-text-filter="${column.key}" type="search" value="${escapeHTML(state.textFilters.get(column.key) || "")}" placeholder="输入关键词"></div></th>`;
+        const selected = state.filters.get(column.key) || new Set();
+        const options = filterOptions(column).map(([token, count]) => {
+          const isSelected = selected.has(token);
+          const unavailable = count === 0;
+          const label = displayFilterValue(column, token);
+          return `<label class="filter-option${unavailable ? " is-unavailable" : ""}" title="${count} 个型号"><input type="checkbox" data-filter-key="${escapeHTML(column.key)}" value="${escapeHTML(token)}"${isSelected ? " checked" : ""}> <span>${escapeHTML(label)}</span></label>`;
+        }).join("") || '<span class="filter-empty">没有可选项</span>';
+        return `<th class="${stickyClass}" scope="col"><div class="filter-control"><div class="filter-options" data-filter-options="${escapeHTML(column.key)}">${options}</div></div></th>`;
       }).join("");
       $("sort-row").innerHTML = columns.map((column) => {
-        const stickyClass = column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : "";
-        if (column.sortable === false || column.key === "spacer" || column.key === "source") return `<th class="${stickyClass}" scope="col"><span class="sort-label">-</span></th>`;
+        const stickyClass = stickyClassFor(column);
+        if (column.sortable === false || column.key === "source") return `<th class="${stickyClass}" scope="col"><span class="sort-label">-</span></th>`;
         return `<th class="${stickyClass}" scope="col"><span class="sort-buttons"><button class="sort-button" type="button" data-sort-key="${column.key}" data-sort-direction="asc" aria-label="${escapeHTML(column.title)}升序" aria-pressed="false" title="升序">▲</button><button class="sort-button" type="button" data-sort-key="${column.key}" data-sort-direction="desc" aria-label="${escapeHTML(column.title)}降序" aria-pressed="false" title="降序">▼</button></span></th>`;
       }).join("");
+      restoreFilterView(view);
       updateSortIndicators();
     }
 
@@ -310,16 +365,17 @@
       });
     }
 
-    function getFilteredRecords() {
+    function getFilteredRecords(excludedKey = null) {
       return state.catalog.filter((record) => {
         for (const column of columns) {
+          if (column.key === excludedKey) continue;
           if (column.kind === "text") {
             const text = (state.textFilters.get(column.key) || "").trim().toLowerCase();
             if (text && !String(columnFilterValue(column, record) || "").toLowerCase().includes(text)) return false;
           }
           if (column.kind === "enum") {
             const selected = state.filters.get(column.key);
-            if (selected?.size && !selected.has(valueToken(columnFilterValue(column, record)))) return false;
+            if (selected?.size && !selected.has(valueToken(columnFilterValue(column, record), column))) return false;
           }
         }
         return true;
@@ -352,11 +408,10 @@
       const start = (state.page - 1) * state.pageSize;
       const visibleRecords = sorted.slice(start, start + state.pageSize);
       $("rows").innerHTML = visibleRecords.map((record) => `<tr>${columns.map((column) => {
-        const cellClass = column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : "";
-        if (column.key === "spacer") return `<td class="${cellClass}" aria-hidden="true"></td>`;
+        const cellClass = stickyClassFor(column);
         if (column.key === "part_number") return `<td class="${cellClass}" title="${escapeHTML(record.part_number)}"><a class="part-number" href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">${escapeHTML(record.part_number)}</a></td>`;
         if (column.key === "source") return `<td class="${cellClass} source-links"><a href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">产品页</a><a href="${safeURL(record.datasheet_url)}" target="_blank" rel="noreferrer">手册</a></td>`;
-        return `<td class="${cellClass}" title="${escapeHTML(column.get(record) ?? "-")}">${displayCellValue(column, record)}</td>`;
+        return `<td class="${cellClass}" title="${escapeHTML(normalizeFilterValue(column, column.get(record)) ?? "-")}">${displayCellValue(column, record)}</td>`;
       }).join("")}</tr>`).join("");
       $("empty").hidden = sorted.length !== 0;
       renderPagination(totalPages);
@@ -390,15 +445,11 @@
       $("pagination").innerHTML = items.join("");
     }
 
-    function clearFilterInputs() {
-      document.querySelectorAll("#filter-row input").forEach((input) => { input.checked = false; input.value = ""; });
-    }
-
     function resetFilters() {
       state.filters.clear();
       state.textFilters.clear();
-      clearFilterInputs();
       state.page = 1;
+      renderHeader();
       renderBody();
     }
 
@@ -424,6 +475,7 @@
       if (!input) return;
       state.textFilters.set(input.dataset.textFilter, input.value);
       state.page = 1;
+      renderHeader();
       renderBody();
     });
 
@@ -432,8 +484,10 @@
       if (!input) return;
       const selected = state.filters.get(input.dataset.filterKey) || new Set();
       if (input.checked) selected.add(input.value); else selected.delete(input.value);
-      state.filters.set(input.dataset.filterKey, selected);
+      if (selected.size) state.filters.set(input.dataset.filterKey, selected);
+      else state.filters.delete(input.dataset.filterKey);
       state.page = 1;
+      renderHeader();
       renderBody();
     });
 
@@ -464,7 +518,7 @@
     ]).then(([catalog, metadata]) => {
       state.catalog = catalog.map((record) => ({
         ...record,
-        _searchText: [record.part_number, record.description, record.manufacturer, record.core, record.package, record.package_variant].filter(Boolean).join(" ").toLowerCase()
+        _searchText: [record.brand, record.part_number, record.description, record.manufacturer, record.core, record.package, record.package_variant].filter(Boolean).join(" ").toLowerCase()
       }));
       state.metadata = metadata;
       renderHeader();

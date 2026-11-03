@@ -34,6 +34,7 @@
       "fields": {
         "mcu_id": {"type": "string", "required": true, "immutable": true, "description": "Stable internal identifier."},
         "manufacturer_id": {"type": "reference", "required": true, "references": "manufacturers.manufacturer_id"},
+        "brand": {"type": "string", "required": true, "description": "Product brand shown in the selection table."},
         "part_number": {"type": "string", "required": true, "description": "Full orderable part number."},
         "family": {"type": "string", "required": true},
         "subfamily": {"type": "string", "required": false},

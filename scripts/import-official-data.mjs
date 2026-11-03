@@ -111,6 +111,12 @@ function familyValues(partNumber) {
   };
 }
 
+function brandValue(manufacturerId) {
+  if (manufacturerId === 'st') return 'STM32';
+  if (manufacturerId === 'geehy') return 'APM32';
+  return text(manufacturerId).toUpperCase();
+}
+
 function rowMap(headers, row) {
   return Object.fromEntries(headers.map((header, index) => [header, row[index] ?? null]));
 }
@@ -187,6 +193,7 @@ function officialRecord(row, format, manufacturerId, sourceName, existingByPart)
   return {
     mcu_id: old?.mcu_id || `${manufacturerId}_${partNumber.toLowerCase()}`,
     manufacturer_id: manufacturerId,
+    brand: brandValue(manufacturerId),
     part_number: partNumber,
     family,
     subfamily,
@@ -336,7 +343,9 @@ for (const file of files) {
   }
 }
 
-const retainedRows = existingRows.filter((row) => !seenParts.has(row.part_number.toUpperCase())).map(({ __line, ...row }) => row);
+const retainedRows = existingRows
+  .filter((row) => !seenParts.has(row.part_number.toUpperCase()))
+  .map(({ __line, ...row }) => ({ ...row, brand: clean(row.brand) || brandValue(row.manufacturer_id) }));
 const headers = Object.keys(schema.tables.mcus.fields);
 writeCsv(path.join(sourceDir, 'mcus.csv'), headers, [...officialRows, ...retainedRows]);
 
