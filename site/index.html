@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="MCU 参数在线选型表，支持筛选、分页和 CSV 导出。">
-  <link rel="icon" href="data:,">
+  <meta name="description" content="MCU 参数在线选型表，支持表头筛选、排序、分页和 CSV 导出。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2317344c'/%3E%3C/svg%3E">
   <title>MCU 参数选型表</title>
   <style>
     :root {
       color-scheme: light;
       --ink: #1b2733;
-      --muted: #667582;
-      --line: #d5dce2;
-      --line-strong: #bcc8d1;
+      --muted: #687783;
+      --line: #ccd7de;
+      --line-strong: #aebdc7;
       --canvas: #f3f5f7;
-      --panel: #ffffff;
+      --panel: #fff;
       --blue-900: #17344c;
       --blue-700: #2d6387;
-      --blue-100: #e9f1f5;
+      --blue-100: #e7f0f4;
       --orange: #e27a2f;
-      --orange-dark: #b75c1f;
+      --orange-dark: #ad571d;
       font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
       color: var(--ink);
       background: var(--canvas);
@@ -30,349 +30,98 @@
     button, input, select { font: inherit; }
     button { cursor: pointer; }
 
-    .site-header {
-      color: #fff;
-      background: var(--blue-900);
-      border-bottom: 4px solid var(--orange);
-    }
+    .site-header { color: #fff; background: var(--blue-900); border-bottom: 4px solid var(--orange); }
+    .header-inner { max-width: 1660px; margin: 0 auto; padding: 21px 28px 19px; }
+    .brand-line { display: flex; align-items: center; gap: 14px; margin-bottom: 11px; }
+    .brand-mark { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 32px; color: var(--blue-900); background: #fff; font-weight: 800; }
+    .eyebrow { margin: 0; color: #b9d2df; font-size: 12px; }
+    h1 { margin: 0; font-size: clamp(24px, 3vw, 36px); line-height: 1.15; }
+    .header-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; color: #d9e7ef; font-size: 14px; }
 
-    .header-inner {
-      max-width: 1660px;
-      margin: 0 auto;
-      padding: 22px 28px 20px;
-    }
-
-    .brand-line {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 12px;
-    }
-
-    .brand-mark {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 32px;
-      color: var(--blue-900);
-      background: #fff;
-      font-weight: 800;
-      letter-spacing: 0;
-    }
-
-    .eyebrow {
-      margin: 0;
-      color: #b7d0df;
-      font-size: 12px;
-      letter-spacing: 0;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(24px, 3vw, 36px);
-      line-height: 1.15;
-      letter-spacing: 0;
-    }
-
-    .header-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 22px;
-      margin: 0;
-      color: #d9e7ef;
-      font-size: 14px;
-    }
-
-    main {
-      max-width: 1660px;
-      margin: 0 auto;
-      padding: 22px 28px 52px;
-    }
-
-    .filter-panel {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      box-shadow: 0 1px 2px rgba(20, 45, 65, .05);
-    }
-
-    .panel-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 13px 16px;
-      border-bottom: 1px solid var(--line);
-      background: #f8fafb;
-    }
-
-    .panel-heading h2 {
-      margin: 0;
-      color: var(--blue-900);
-      font-size: 16px;
-      letter-spacing: 0;
-    }
-
-    .panel-heading span {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .filter-form { padding: 16px; }
-
-    .filter-grid {
-      display: grid;
-      grid-template-columns: minmax(260px, 2.2fr) repeat(4, minmax(145px, 1fr));
-      gap: 12px;
-    }
-
-    .filter-grid + .filter-grid { margin-top: 12px; }
-
-    .field {
-      display: grid;
-      align-content: start;
-      gap: 6px;
-      min-width: 0;
-    }
-
-    .field label {
-      color: #4e5e6b;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .field input,
-    .field select {
-      width: 100%;
-      min-height: 36px;
-      padding: 7px 9px;
-      border: 1px solid var(--line-strong);
-      border-radius: 2px;
-      outline: 0;
-      color: var(--ink);
-      background: #fff;
-    }
-
-    .field input:focus,
-    .field select:focus {
-      border-color: var(--blue-700);
-      box-shadow: 0 0 0 2px rgba(45, 99, 135, .14);
-    }
-
-    .range-field { grid-column: span 2; }
-
-    .range-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .range-inputs input { min-width: 0; }
-
-    .filter-actions {
-      display: flex;
-      align-items: end;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-
-    .button {
-      min-height: 36px;
-      padding: 7px 14px;
-      border: 1px solid var(--blue-700);
-      border-radius: 2px;
-      color: #fff;
-      background: var(--blue-700);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
+    main { max-width: 1660px; margin: 0 auto; padding: 22px 28px 52px; }
+    .toolbar { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .toolbar h2 { margin: 0 0 4px; color: var(--blue-900); font-size: 20px; }
+    .toolbar p { margin: 0; color: var(--muted); font-size: 13px; }
+    .toolbar-actions { display: flex; gap: 8px; }
+    .button { min-height: 36px; padding: 7px 14px; border: 1px solid var(--blue-700); border-radius: 2px; color: #fff; background: var(--blue-700); font-weight: 700; white-space: nowrap; }
     .button:hover { background: var(--blue-900); }
     .button.secondary { color: var(--blue-900); background: #fff; }
     .button.secondary:hover { background: var(--blue-100); }
 
-    .table-heading {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin: 22px 0 10px;
-    }
-
-    .table-heading h2 {
-      margin: 0 0 4px;
-      color: var(--blue-900);
-      font-size: 19px;
-    }
-
-    .table-heading p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .table-actions { display: flex; gap: 8px; }
-
-    .table-shell {
-      overflow: auto;
-      max-height: min(68vh, 760px);
-      border: 1px solid var(--line-strong);
-      background: #fff;
-      scrollbar-color: #a9b9c4 #edf1f3;
-    }
-
-    .data-table {
-      width: 100%;
-      min-width: 2240px;
-      border-collapse: separate;
-      border-spacing: 1px;
-      table-layout: fixed;
-      background: #d8e0e5;
-      font-size: 12px;
-    }
-
-    .data-table th,
-    .data-table td {
-      height: 34px;
-      padding: 6px 8px;
-      overflow: hidden;
-      border: 0;
-      text-align: left;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .data-table thead th {
-      position: sticky;
-      top: 0;
-      z-index: 3;
-      height: 42px;
-      color: #1d2e3b;
-      background: #e8eef2;
-      font-weight: 800;
-      line-height: 1.3;
-      white-space: normal;
-    }
-
-    .data-table tbody td { background: #fff; }
+    .table-shell { position: relative; overflow: auto; max-height: min(72vh, 820px); border: 1px solid var(--line-strong); background: #fff; scrollbar-color: #a9b9c4 #edf1f3; }
+    .data-table { width: 100%; min-width: 2440px; border-collapse: separate; border-spacing: 1px; table-layout: fixed; background: #d5dfe5; font-size: 11px; }
+    .data-table th, .data-table td { overflow: hidden; padding: 5px 7px; border: 0; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table thead th { position: sticky; z-index: 5; color: #1d2e3b; background: #e8eef2; font-weight: 700; }
+    .data-table thead .notes-row th { top: 0; height: 64px; vertical-align: top; white-space: normal; }
+    .data-table thead .filter-row th { top: 65px; z-index: 9; height: 48px; overflow: visible; vertical-align: top; background: #f7f9fa; }
+    .data-table thead .filter-row .col-spacer { z-index: 11 !important; }
+    .data-table thead .filter-row .col-part { z-index: 10 !important; }
+    .data-table thead .sort-row th { top: 114px; height: 34px; vertical-align: middle; background: #e5ecef; }
+    .data-table tbody td { height: 34px; background: #fff; }
     .data-table tbody tr:nth-child(even) td { background: #f8fafb; }
     .data-table tbody tr:hover td { background: #fff3e9; }
 
-    .data-table .sticky-col {
-      position: sticky;
-      left: 0;
-      z-index: 2;
-      box-shadow: 2px 0 4px rgba(20, 45, 65, .12);
-    }
+    .column-note { display: block; margin-bottom: 4px; color: #536673; font-size: 10px; font-weight: 700; line-height: 1.25; }
+    .column-note-text { display: block; color: #7b8992; font-size: 10px; font-weight: 400; line-height: 1.25; }
+    .filter-none { color: #a0abb1; }
+    .sort-label { color: #687984; font-size: 10px; }
+    .col-spacer { position: sticky !important; left: 0; z-index: 8 !important; width: 28px; }
+    .col-part { position: sticky !important; left: 29px; z-index: 7 !important; box-shadow: 2px 0 5px rgba(20, 45, 65, .16); }
+    .data-table thead .col-spacer { background: #e0e8ec; }
+    .data-table thead .col-part { background: #dce6eb; }
+    .data-table tbody tr:nth-child(even) .col-spacer, .data-table tbody tr:nth-child(even) .col-part { background: #f8fafb; }
+    .data-table tbody tr:hover .col-spacer, .data-table tbody tr:hover .col-part { background: #fff3e9; }
 
-    .data-table thead .sticky-col { z-index: 4; background: #dce6eb; }
-    .data-table tbody tr:nth-child(even) .sticky-col { background: #f8fafb; }
-    .data-table tbody tr:hover .sticky-col { background: #fff3e9; }
-
-    .part-number {
-      color: var(--blue-700);
-      font-weight: 800;
-      text-decoration: underline;
-      text-decoration-color: #a7bfce;
-      text-underline-offset: 2px;
-    }
-
-    .source-links { display: flex; gap: 7px; }
+    .part-number { color: var(--blue-700); font-weight: 800; text-decoration: underline; text-decoration-color: #a7bfce; text-underline-offset: 2px; }
     a { color: var(--blue-700); }
     a:hover { color: var(--orange-dark); }
-
+    .source-links { display: flex; gap: 7px; }
     .boolean-yes { color: #267344; font-weight: 700; }
-    .boolean-no { color: #79858e; }
-    .unknown { color: #9aa5ac; }
+    .boolean-no, .unknown { color: #7b8790; }
 
-    .empty-state {
-      padding: 38px 16px;
-      color: var(--muted);
-      text-align: center;
-      background: #fff;
-    }
+    .filter-dropdown { position: relative; display: block; width: 100%; }
+    .filter-dropdown > summary { display: flex; align-items: center; justify-content: space-between; gap: 4px; min-height: 28px; padding: 5px 6px; border: 1px solid var(--line-strong); border-radius: 2px; color: var(--blue-700); background: #fff; cursor: pointer; font-size: 11px; font-weight: 700; list-style: none; }
+    .filter-dropdown > summary::-webkit-details-marker { display: none; }
+    .filter-dropdown > summary::after { content: "▼"; color: var(--muted); font-size: 9px; }
+    .filter-dropdown[open] > summary { border-color: var(--blue-700); box-shadow: 0 0 0 2px rgba(45, 99, 135, .12); }
+    .filter-count { display: none; color: var(--orange-dark); }
+    .filter-count:not(:empty) { display: inline; }
+    .filter-menu { position: absolute; top: calc(100% + 3px); left: 0; z-index: 30; width: 232px; padding: 9px; border: 1px solid var(--line-strong); box-shadow: 0 4px 12px rgba(17, 40, 56, .18); color: var(--ink); background: #fff; font-weight: 400; }
+    .filter-row th:nth-last-child(-n+3) .filter-menu { right: 0; left: auto; }
+    .filter-option-search, .text-filter { width: 100%; min-height: 30px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 2px; outline: 0; font-size: 11px; }
+    .filter-option-search:focus, .text-filter:focus { border-color: var(--blue-700); }
+    .filter-options { max-height: 170px; margin: 7px 0; overflow-y: auto; border-top: 1px solid #edf1f3; border-bottom: 1px solid #edf1f3; }
+    .filter-option { display: flex; align-items: flex-start; gap: 5px; padding: 5px 2px; color: #445661; cursor: pointer; font-size: 11px; line-height: 1.25; }
+    .filter-option:hover { background: var(--blue-100); }
+    .filter-option input { flex: 0 0 auto; margin: 1px 0 0; }
+    .filter-menu-actions { display: flex; justify-content: space-between; gap: 6px; }
+    .filter-menu-actions button { padding: 4px 7px; border: 1px solid var(--line-strong); border-radius: 2px; color: var(--blue-700); background: #fff; font-size: 11px; }
+    .filter-menu-actions button:hover { background: var(--blue-100); }
+    .filter-empty { padding: 10px 2px; color: var(--muted); font-size: 11px; }
 
-    .status-bar,
-    .pagination-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      padding: 12px 0;
-    }
+    .sort-buttons { display: inline-flex; align-items: center; gap: 3px; }
+    .sort-button { width: 23px; height: 22px; padding: 0; border: 1px solid var(--line-strong); border-radius: 2px; color: #5f707b; background: #fff; font-size: 12px; line-height: 20px; }
+    .sort-button:hover, .sort-button[aria-pressed="true"] { color: #fff; border-color: var(--blue-700); background: var(--blue-700); }
+    .sort-button[aria-pressed="true"] { box-shadow: 0 0 0 2px rgba(226, 122, 47, .22); }
 
+    .empty-state { padding: 38px 16px; color: var(--muted); text-align: center; background: #fff; }
+    .status-bar, .pagination-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 12px 0; }
     .status-bar { color: var(--muted); font-size: 13px; }
-
-    .page-size {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      color: #4e5e6b;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .page-size select {
-      min-height: 32px;
-      padding: 4px 8px;
-      border: 1px solid var(--line-strong);
-      border-radius: 2px;
-      background: #fff;
-    }
-
-    .pagination {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .page-button {
-      min-width: 32px;
-      height: 32px;
-      padding: 3px 8px;
-      border: 1px solid var(--line-strong);
-      border-radius: 2px;
-      color: var(--blue-700);
-      background: #fff;
-    }
-
-    .page-button:hover:not(:disabled),
-    .page-button[aria-current="page"] {
-      color: #fff;
-      border-color: var(--blue-700);
-      background: var(--blue-700);
-    }
-
+    .page-size { display: inline-flex; align-items: center; gap: 7px; color: #4e5e6b; font-size: 13px; }
+    .page-size select { min-height: 32px; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 2px; background: #fff; }
+    .pagination { display: flex; align-items: center; gap: 4px; margin: 0; padding: 0; list-style: none; }
+    .page-button { min-width: 32px; height: 32px; padding: 3px 8px; border: 1px solid var(--line-strong); border-radius: 2px; color: var(--blue-700); background: #fff; }
+    .page-button:hover:not(:disabled), .page-button[aria-current="page"] { color: #fff; border-color: var(--blue-700); background: var(--blue-700); }
     .page-button:disabled { cursor: not-allowed; opacity: .45; }
     .page-ellipsis { padding: 0 4px; color: var(--muted); }
-
-    .error-state {
-      padding: 18px;
-      border: 1px solid #e2b7a0;
-      color: #8c3c1b;
-      background: #fff5ef;
-    }
-
-    @media (max-width: 1100px) {
-      .filter-grid { grid-template-columns: repeat(3, minmax(145px, 1fr)); }
-      .filter-grid .keyword-field { grid-column: span 2; }
-      .range-field { grid-column: span 1; }
-      .filter-actions { justify-content: flex-start; }
-    }
+    .error-state { padding: 18px; border: 1px solid #e2b7a0; color: #8c3c1b; background: #fff5ef; }
 
     @media (max-width: 700px) {
       .header-inner, main { padding-right: 14px; padding-left: 14px; }
-      .panel-heading, .table-heading { align-items: flex-start; flex-direction: column; }
-      .filter-grid { grid-template-columns: 1fr; }
-      .filter-grid .keyword-field,
-      .range-field { grid-column: auto; }
-      .filter-actions, .table-actions { width: 100%; }
-      .button { flex: 1; }
-      .table-heading { margin-top: 18px; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { width: 100%; }
+      .toolbar-actions .button { flex: 1; }
+      .filter-menu { width: 210px; }
       .status-bar, .pagination-bar { align-items: flex-start; flex-direction: column; }
       .pagination { flex-wrap: wrap; }
     }
@@ -381,243 +130,265 @@
 <body>
   <header class="site-header">
     <div class="header-inner">
-      <div class="brand-line">
-        <span class="brand-mark" aria-hidden="true">MCU</span>
-        <p class="eyebrow">在线参数目录</p>
-      </div>
+      <div class="brand-line"><span class="brand-mark" aria-hidden="true">MCU</span><p class="eyebrow">在线参数目录</p></div>
       <h1>MCU 参数选型表</h1>
       <p class="header-meta"><span>STM32 系列</span><span>型号级参数</span><span id="header-record-count">数据加载中...</span></p>
     </div>
   </header>
 
   <main>
-    <section class="filter-panel" aria-labelledby="filter-title">
-      <div class="panel-heading">
-        <h2 id="filter-title">筛选条件</h2>
-        <span>参数范围使用“最小值”和“最大值”</span>
-      </div>
-      <form id="filter-form" class="filter-form">
-        <div class="filter-grid">
-          <div class="field keyword-field">
-            <label for="search">型号 / 关键词</label>
-            <input id="search" type="search" placeholder="型号、系列、内核、封装或描述">
-          </div>
-          <div class="field">
-            <label for="family">系列</label>
-            <select id="family"><option value="">全部系列</option></select>
-          </div>
-          <div class="field">
-            <label for="subfamily">子系列</label>
-            <select id="subfamily"><option value="">全部子系列</option></select>
-          </div>
-          <div class="field">
-            <label for="core">内核</label>
-            <select id="core"><option value="">全部内核</option></select>
-          </div>
-          <div class="field">
-            <label for="package">封装</label>
-            <select id="package"><option value="">全部封装</option></select>
-          </div>
-        </div>
-        <div class="filter-grid">
-          <div class="field range-field">
-            <label>主频（MHz）</label>
-            <div class="range-inputs"><input id="frequency-min" type="number" min="0" step="any" placeholder="最小值"><input id="frequency-max" type="number" min="0" step="any" placeholder="最大值"></div>
-          </div>
-          <div class="field range-field">
-            <label>Flash（KB）</label>
-            <div class="range-inputs"><input id="flash-min" type="number" min="0" step="1" placeholder="最小值"><input id="flash-max" type="number" min="0" step="1" placeholder="最大值"></div>
-          </div>
-          <div class="field range-field">
-            <label>SRAM（KB）</label>
-            <div class="range-inputs"><input id="sram-min" type="number" min="0" step="1" placeholder="最小值"><input id="sram-max" type="number" min="0" step="1" placeholder="最大值"></div>
-          </div>
-          <div class="field">
-            <label for="usb">USB</label>
-            <select id="usb"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
-          </div>
-          <div class="field">
-            <label for="can">CAN</label>
-            <select id="can"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
-          </div>
-        </div>
-        <div class="filter-grid">
-          <div class="field range-field">
-            <label>引脚数</label>
-            <div class="range-inputs"><input id="pins-min" type="number" min="0" step="1" placeholder="最小值"><input id="pins-max" type="number" min="0" step="1" placeholder="最大值"></div>
-          </div>
-          <div class="field">
-            <label for="ethernet">Ethernet</label>
-            <select id="ethernet"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
-          </div>
-          <div class="field">
-            <label for="sdio">SDIO</label>
-            <select id="sdio"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
-          </div>
-          <div class="field">
-            <label for="qspi">QSPI</label>
-            <select id="qspi"><option value="">不限</option><option value="true">具备</option><option value="false">不具备</option><option value="unknown">未确认</option></select>
-          </div>
-          <div class="filter-actions">
-            <button class="button secondary" id="reset-filters" type="reset">清除筛选</button>
-          </div>
-        </div>
-      </form>
-    </section>
-
-    <div class="table-heading">
-      <div>
-        <h2>产品参数</h2>
-        <p id="summary">正在加载数据...</p>
-      </div>
-      <div class="table-actions">
-        <button class="button" id="export-csv" type="button">导出筛选结果</button>
-      </div>
+    <div class="toolbar">
+      <div><h2>产品参数</h2><p id="summary">正在加载数据...</p></div>
+      <div class="toolbar-actions"><button class="button secondary" id="clear-filters" type="button">清除筛选</button><button class="button" id="export-csv" type="button">导出筛选结果</button></div>
     </div>
 
     <div id="load-error" class="error-state" hidden>数据加载失败，请检查发布目录中的生成文件。</div>
     <div class="table-shell" id="table-shell">
       <table class="data-table" aria-describedby="summary">
-        <colgroup>
-          <col style="width: 156px"><col style="width: 86px"><col style="width: 102px"><col style="width: 76px"><col style="width: 78px"><col style="width: 78px"><col style="width: 88px"><col style="width: 94px"><col style="width: 110px"><col style="width: 60px"><col style="width: 66px"><col style="width: 72px"><col style="width: 60px"><col style="width: 70px"><col style="width: 86px"><col style="width: 54px"><col style="width: 54px"><col style="width: 54px"><col style="width: 58px"><col style="width: 78px"><col style="width: 64px"><col style="width: 64px"><col style="width: 136px">
-        </colgroup>
+        <colgroup id="column-widths"></colgroup>
         <thead>
-          <tr>
-            <th class="sticky-col" scope="col">产品型号</th><th scope="col">系列</th><th scope="col">内核</th><th scope="col">主频<br>MHz</th><th scope="col">Flash<br>KB</th><th scope="col">SRAM<br>KB</th><th scope="col">供电<br>V</th><th scope="col">工作温度<br>°C</th><th scope="col">封装</th><th scope="col">引脚</th><th scope="col">GPIO</th><th scope="col">ADC</th><th scope="col">DAC</th><th scope="col">定时器</th><th scope="col">UART / USART</th><th scope="col">SPI</th><th scope="col">I2C</th><th scope="col">CAN</th><th scope="col">USB</th><th scope="col">Ethernet</th><th scope="col">SDIO</th><th scope="col">QSPI</th><th scope="col">来源</th>
-          </tr>
+          <tr class="notes-row" id="notes-row"></tr>
+          <tr class="filter-row" id="filter-row"></tr>
+          <tr class="sort-row" id="sort-row"></tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
       <div id="empty" class="empty-state" hidden>没有符合条件的型号。</div>
     </div>
 
-    <div class="status-bar">
-      <span id="result-range">-</span>
-      <span id="generated-at">数据生成时间：-</span>
-    </div>
+    <div class="status-bar"><span id="result-range">-</span><span id="generated-at">数据生成时间：-</span></div>
     <div class="pagination-bar">
-      <label class="page-size" for="page-size">每页显示
-        <select id="page-size"><option value="100" selected>100 条</option><option value="200">200 条</option><option value="500">500 条</option></select>
-      </label>
+      <label class="page-size" for="page-size">每页显示<select id="page-size"><option value="100" selected>100 条</option><option value="200">200 条</option><option value="500">500 条</option></select></label>
       <nav aria-label="产品数据分页"><ol id="pagination" class="pagination"></ol></nav>
     </div>
   </main>
 
   <script>
-    const state = { catalog: [], metadata: {}, page: 1, pageSize: 100, filteredRecords: [] };
+    const state = {
+      catalog: [],
+      metadata: {},
+      page: 1,
+      pageSize: 100,
+      filteredRecords: [],
+      filters: new Map(),
+      textFilters: new Map(),
+      sort: { key: null, direction: null }
+    };
     const $ = (id) => document.getElementById(id);
-    const rangeFilters = [
-      ["frequency-min", "frequency-max", "max_frequency_mhz"],
-      ["flash-min", "flash-max", "flash_kb"],
-      ["sram-min", "sram-max", "sram_kb"],
-      ["pins-min", "pins-max", "pin_count"]
-    ];
-    const featureFilters = ["usb", "can", "ethernet", "sdio", "qspi"];
-    const exportColumns = [
-      ["产品型号", "part_number"], ["系列", "family"], ["子系列", "subfamily"], ["内核", "core"],
-      ["主频（MHz）", "max_frequency_mhz"], ["Flash（KB）", "flash_kb"], ["SRAM（KB）", "sram_kb"],
-      ["供电（V）", "voltage"], ["工作温度（°C）", "temperature"], ["封装", "package_variant"],
-      ["引脚数", "pin_count"], ["GPIO", "gpio_count"], ["ADC通道", "adc_channel_count"],
-      ["DAC通道", "dac_channel_count"], ["定时器", "timer_count"], ["UART/USART", "serial_count"],
-      ["SPI", "spi_count"], ["I2C", "i2c_count"], ["CAN", "can_count"], ["USB", "usb"],
-      ["Ethernet", "ethernet"], ["SDIO", "sdio"], ["QSPI", "qspi"], ["产品页", "product_url"], ["数据手册", "datasheet_url"]
+    const MISSING = "__missing__";
+
+    function voltageValue(record) {
+      if (record.vdd_min_v === null || record.vdd_min_v === undefined || record.vdd_max_v === null || record.vdd_max_v === undefined) return null;
+      return `${record.vdd_min_v}-${record.vdd_max_v}`;
+    }
+
+    function temperatureValue(record) {
+      if (record.temperature_min_c === null || record.temperature_min_c === undefined || record.temperature_max_c === null || record.temperature_max_c === undefined) return null;
+      return `${record.temperature_min_c} to ${record.temperature_max_c}`;
+    }
+
+    function serialValue(record) {
+      const values = [];
+      if (record.uart_count !== null && record.uart_count !== undefined) values.push(`UART ${record.uart_count}`);
+      if (record.usart_count !== null && record.usart_count !== undefined) values.push(`USART ${record.usart_count}`);
+      return values.length ? values.join(" / ") : null;
+    }
+
+    const columns = [
+      { key: "spacer", title: "", note: "", width: 28, kind: "none", sortable: false, get: () => null },
+      { key: "part_number", title: "产品型号", note: "完整订货型号", width: 156, kind: "text", valueType: "text", sortGet: (record) => record.part_number, get: (record) => record.part_number },
+      { key: "family", title: "系列", note: "产品系列", width: 86, kind: "enum", valueType: "text", get: (record) => record.family },
+      { key: "subfamily", title: "子系列", note: "产品子系列", width: 100, kind: "enum", valueType: "text", get: (record) => record.subfamily },
+      { key: "core", title: "内核", note: "CPU 内核", width: 112, kind: "enum", valueType: "text", get: (record) => record.core },
+      { key: "max_frequency_mhz", title: "主频（MHz）", note: "最高主频", width: 80, kind: "enum", valueType: "number", get: (record) => record.max_frequency_mhz },
+      { key: "flash_kb", title: "Flash（KB）", note: "程序存储容量", width: 84, kind: "enum", valueType: "number", get: (record) => record.flash_kb },
+      { key: "sram_kb", title: "SRAM（KB）", note: "运行存储容量", width: 84, kind: "enum", valueType: "number", get: (record) => record.sram_kb },
+      { key: "voltage", title: "工作电压（V）", note: "VDD 最小值-最大值", width: 96, kind: "enum", valueType: "text", sortGet: (record) => record.vdd_min_v, get: voltageValue },
+      { key: "temperature", title: "工作温度（°C）", note: "最小值-最大值", width: 104, kind: "enum", valueType: "text", sortGet: (record) => record.temperature_max_c, get: temperatureValue },
+      { key: "package_variant", title: "封装", note: "封装型号", width: 132, kind: "enum", valueType: "text", get: (record) => record.package_variant || record.package },
+      { key: "pin_count", title: "引脚", note: "引脚数量", width: 62, kind: "enum", valueType: "number", get: (record) => record.pin_count },
+      { key: "gpio_count", title: "GPIO", note: "可用 GPIO 数量", width: 68, kind: "enum", valueType: "number", get: (record) => record.gpio_count },
+      { key: "adc", title: "ADC", note: "通道数 / 分辨率", width: 86, kind: "enum", valueType: "number", filterGet: (record) => record.adc_channel_count, sortGet: (record) => record.adc_channel_count, get: (record) => record.adc_channel_count === null || record.adc_channel_count === undefined ? null : `${record.adc_channel_count} / ${record.adc_resolution_bits || "-"} bit` },
+      { key: "dac_channel_count", title: "DAC", note: "DAC 通道数量", width: 62, kind: "enum", valueType: "number", get: (record) => record.dac_channel_count },
+      { key: "timer_count", title: "定时器", note: "定时器数量", width: 72, kind: "enum", valueType: "number", get: (record) => record.timer_count },
+      { key: "serial", title: "UART / USART", note: "串口数量", width: 108, kind: "enum", valueType: "text", get: serialValue },
+      { key: "spi_count", title: "SPI", note: "SPI 数量", width: 56, kind: "enum", valueType: "number", get: (record) => record.spi_count },
+      { key: "i2c_count", title: "I2C", note: "I2C 数量", width: 56, kind: "enum", valueType: "number", get: (record) => record.i2c_count },
+      { key: "can_count", title: "CAN", note: "CAN 数量", width: 56, kind: "enum", valueType: "number", get: (record) => record.can_count },
+      { key: "usb", title: "USB", note: "USB 接口", width: 64, kind: "enum", valueType: "boolean", get: (record) => record.usb },
+      { key: "ethernet", title: "Ethernet", note: "以太网接口", width: 82, kind: "enum", valueType: "boolean", get: (record) => record.ethernet },
+      { key: "sdio", title: "SDIO", note: "SD 卡接口", width: 64, kind: "enum", valueType: "boolean", get: (record) => record.sdio },
+      { key: "qspi", title: "QSPI", note: "Quad SPI 接口", width: 64, kind: "enum", valueType: "boolean", get: (record) => record.qspi },
+      { key: "source", title: "来源", note: "官方链接", width: 136, kind: "none", sortable: false, get: () => null }
     ];
 
-    const uniqueSorted = (records, key) => [...new Set(records.map((record) => record[key]).filter((value) => value !== null && value !== undefined && value !== ""))]
-      .sort((a, b) => String(a).localeCompare(String(b), "zh-CN", { numeric: true }));
+    const exportColumns = [
+      ["产品型号", (record) => record.part_number], ["系列", (record) => record.family], ["子系列", (record) => record.subfamily], ["内核", (record) => record.core],
+      ["主频（MHz）", (record) => record.max_frequency_mhz], ["Flash（KB）", (record) => record.flash_kb], ["SRAM（KB）", (record) => record.sram_kb],
+      ["供电（V）", voltageValue], ["工作温度（°C）", temperatureValue], ["封装", (record) => record.package_variant || record.package], ["引脚数", (record) => record.pin_count],
+      ["GPIO", (record) => record.gpio_count], ["ADC", (record) => record.adc_channel_count], ["DAC", (record) => record.dac_channel_count], ["定时器", (record) => record.timer_count],
+      ["UART/USART", serialValue], ["SPI", (record) => record.spi_count], ["I2C", (record) => record.i2c_count], ["CAN", (record) => record.can_count],
+      ["USB", (record) => record.usb], ["Ethernet", (record) => record.ethernet], ["SDIO", (record) => record.sdio], ["QSPI", (record) => record.qspi],
+      ["产品页", (record) => record.product_url], ["数据手册", (record) => record.datasheet_url]
+    ];
 
     function escapeHTML(value) {
       return String(value ?? "-").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
     }
 
-    function safeURL(value) {
-      return /^https?:\/\//i.test(value || "") ? escapeHTML(value) : "#";
+    function safeURL(value) { return /^https?:\/\//i.test(value || "") ? escapeHTML(value) : "#"; }
+    function isMissing(value) { return value === null || value === undefined || value === ""; }
+    function valueToken(value) { return isMissing(value) ? MISSING : String(value); }
+
+    function displayFilterValue(column, token) {
+      if (token === MISSING) return "未确认";
+      if (column.valueType === "boolean") return token === "true" ? "有" : "无";
+      return token;
     }
 
-    function formatValue(value, suffix = "") {
-      return value === null || value === undefined || value === "" ? "-" : `${escapeHTML(value)}${suffix}`;
+    function displayCellValue(column, record) {
+      const value = column.get(record);
+      if (isMissing(value)) return '<span class="unknown">-</span>';
+      if (column.valueType === "boolean") return value ? '<span class="boolean-yes">有</span>' : '<span class="boolean-no">无</span>';
+      return escapeHTML(value);
     }
 
-    function formatBoolean(value) {
-      if (value === true) return '<span class="boolean-yes">有</span>';
-      if (value === false) return '<span class="boolean-no">无</span>';
-      return '<span class="unknown">-</span>';
+    function columnFilterValue(column, record) { return (column.filterGet || column.get)(record); }
+    function sortableValue(column, record) { return (column.sortGet || column.get)(record); }
+
+    function sortCompare(column, left, right) {
+      const a = sortableValue(column, left);
+      const b = sortableValue(column, right);
+      const aMissing = isMissing(a);
+      const bMissing = isMissing(b);
+      if (aMissing && bMissing) return 0;
+      if (aMissing) return 1;
+      if (bMissing) return -1;
+      if (column.valueType === "number") return Number(a) - Number(b);
+      if (column.valueType === "boolean") return Number(a) - Number(b);
+      return String(a).localeCompare(String(b), "zh-CN", { numeric: true, sensitivity: "base" });
     }
 
-    function formatVoltage(record) {
-      if (record.vdd_min_v === null || record.vdd_min_v === undefined || record.vdd_max_v === null || record.vdd_max_v === undefined) return "-";
-      return `${escapeHTML(record.vdd_min_v)}-${escapeHTML(record.vdd_max_v)}`;
-    }
-
-    function formatTemperature(record) {
-      if (record.temperature_min_c === null || record.temperature_min_c === undefined || record.temperature_max_c === null || record.temperature_max_c === undefined) return "-";
-      return `${escapeHTML(record.temperature_min_c)} to ${escapeHTML(record.temperature_max_c)}`;
-    }
-
-    function formatSerial(record) {
-      const values = [record.uart_count === null || record.uart_count === undefined ? null : `UART ${record.uart_count}`, record.usart_count === null || record.usart_count === undefined ? null : `USART ${record.usart_count}`].filter(Boolean);
-      return values.length ? values.map(escapeHTML).join(" / ") : "-";
-    }
-
-    function fillOptions(id, values) {
-      const select = $(id);
-      for (const value of values) {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        select.append(option);
-      }
-    }
-
-    function readNumber(id) {
-      const value = $(id).value.trim();
-      return value === "" ? null : Number(value);
-    }
-
-    function inRange(value, minimum, maximum) {
-      if (minimum === null && maximum === null) return true;
-      if (value === null || value === undefined || Number.isNaN(Number(value))) return false;
-      return (minimum === null || Number(value) >= minimum) && (maximum === null || Number(value) <= maximum);
-    }
-
-    function featureMatches(record, field) {
-      const expected = $(field).value;
-      if (!expected) return true;
-      if (expected === "unknown") return record[field] === null || record[field] === undefined;
-      return record[field] === (expected === "true");
-    }
-
-    function getFilteredRecords() {
-      const keyword = $("search").value.trim().toLowerCase();
-      const family = $("family").value;
-      const subfamily = $("subfamily").value;
-      const core = $("core").value;
-      const packageName = $("package").value;
-      const ranges = Object.fromEntries(rangeFilters.map(([minimumId, maximumId, field]) => [field, [readNumber(minimumId), readNumber(maximumId)]]));
-
-      return state.catalog.filter((record) => {
-        const keywordMatches = !keyword || record._searchText.includes(keyword);
-        const selectMatches = (!family || record.family === family) && (!subfamily || record.subfamily === subfamily) && (!core || record.core === core) && (!packageName || record.package === packageName);
-        const rangeMatches = Object.entries(ranges).every(([field, [minimum, maximum]]) => inRange(record[field], minimum, maximum));
-        const featureMatchesAll = featureFilters.every((field) => featureMatches(record, field));
-        return keywordMatches && selectMatches && rangeMatches && featureMatchesAll;
+    function filterTokens(column) {
+      const tokens = [...new Set(state.catalog.map((record) => valueToken(columnFilterValue(column, record))))];
+      return tokens.sort((left, right) => {
+        if (left === MISSING) return 1;
+        if (right === MISSING) return -1;
+        if (column.valueType === "number") return Number(left) - Number(right);
+        if (column.valueType === "boolean") return Number(left === "true") - Number(right === "true");
+        return left.localeCompare(right, "zh-CN", { numeric: true, sensitivity: "base" });
       });
     }
 
-    function renderRows(records) {
+    function renderHeader() {
+      $("column-widths").innerHTML = columns.map((column) => `<col style="width:${column.width}px">`).join("");
+      $("notes-row").innerHTML = columns.map((column) => `<th class="${column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : ""}" scope="col"><span class="column-note">${column.key === "spacer" ? "说明 / 备注" : escapeHTML(column.title)}</span><span class="column-note-text">${escapeHTML(column.note || "")}</span></th>`).join("");
+      $("filter-row").innerHTML = columns.map((column) => {
+        const stickyClass = column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : "";
+        if (column.kind === "none") return `<th class="${stickyClass}" scope="col"><span class="filter-none">-</span></th>`;
+        if (column.kind === "text") return `<th class="${stickyClass}" scope="col"><details class="filter-dropdown" data-filter-key="${column.key}"><summary>文本筛选 <span class="filter-count"></span></summary><div class="filter-menu"><input class="text-filter" data-text-filter="${column.key}" type="search" placeholder="输入关键词"><div class="filter-menu-actions"><button type="button" data-filter-action="clear">清空</button><button type="button" data-filter-action="close">完成</button></div></div></details></th>`;
+        return `<th class="${stickyClass}" scope="col"><details class="filter-dropdown" data-filter-key="${column.key}"><summary>复选筛选 <span class="filter-count"></span></summary><div class="filter-menu"><input class="filter-option-search" type="search" placeholder="搜索选项"><div class="filter-options" data-ready="false"><span class="filter-empty">打开后加载选项</span></div><div class="filter-menu-actions"><button type="button" data-filter-action="all">全选</button><button type="button" data-filter-action="clear">清空</button><button type="button" data-filter-action="close">完成</button></div></div></details></th>`;
+      }).join("");
+      $("sort-row").innerHTML = columns.map((column) => {
+        const stickyClass = column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : "";
+        if (column.sortable === false || column.key === "spacer" || column.key === "source") return `<th class="${stickyClass}" scope="col"><span class="sort-label">-</span></th>`;
+        return `<th class="${stickyClass}" scope="col"><span class="sort-buttons"><button class="sort-button" type="button" data-sort-key="${column.key}" data-sort-direction="asc" aria-label="${escapeHTML(column.title)}升序" aria-pressed="false" title="升序">▲</button><button class="sort-button" type="button" data-sort-key="${column.key}" data-sort-direction="desc" aria-label="${escapeHTML(column.title)}降序" aria-pressed="false" title="降序">▼</button></span></th>`;
+      }).join("");
+      bindDetailsEvents();
+      updateFilterIndicators();
+      updateSortIndicators();
+    }
+
+    function bindDetailsEvents() {
+      document.querySelectorAll("#filter-row details").forEach((details) => details.addEventListener("toggle", () => {
+        if (!details.open) return;
+        const column = columns.find((item) => item.key === details.dataset.filterKey);
+        if (!column || column.kind !== "enum") return;
+        const options = details.querySelector(".filter-options");
+        if (options.dataset.ready === "true") return;
+        options.innerHTML = filterTokens(column).map((token) => `<label class="filter-option" data-filter-label="${escapeHTML(displayFilterValue(column, token).toLowerCase())}"><input type="checkbox" data-filter-key="${escapeHTML(column.key)}" value="${escapeHTML(token)}"> <span>${escapeHTML(displayFilterValue(column, token))}</span></label>`).join("") || '<span class="filter-empty">没有可选项</span>';
+        options.dataset.ready = "true";
+        syncFilterCheckboxes(details, column.key);
+      }));
+    }
+
+    function syncFilterCheckboxes(details, key) {
+      const selected = state.filters.get(key) || new Set();
+      details.querySelectorAll(`input[type="checkbox"][data-filter-key="${CSS.escape(key)}"]`).forEach((input) => { input.checked = selected.has(input.value); });
+    }
+
+    function updateFilterIndicators() {
+      document.querySelectorAll("#filter-row details").forEach((details) => {
+        const key = details.dataset.filterKey;
+        const count = state.filters.get(key)?.size || (state.textFilters.get(key) ? 1 : 0);
+        const indicator = details.querySelector(".filter-count");
+        if (indicator) indicator.textContent = count ? `(${count})` : "";
+      });
+    }
+
+    function updateSortIndicators() {
+      document.querySelectorAll(".sort-button").forEach((button) => {
+        const active = state.sort.key === button.dataset.sortKey && state.sort.direction === button.dataset.sortDirection;
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function getFilteredRecords() {
+      return state.catalog.filter((record) => {
+        for (const column of columns) {
+          if (column.kind === "text") {
+            const text = (state.textFilters.get(column.key) || "").trim().toLowerCase();
+            if (text && !String(columnFilterValue(column, record) || "").toLowerCase().includes(text)) return false;
+          }
+          if (column.kind === "enum") {
+            const selected = state.filters.get(column.key);
+            if (selected?.size && !selected.has(valueToken(columnFilterValue(column, record)))) return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function getSortedRecords(records) {
+      if (!state.sort.key || !state.sort.direction) return records;
+      const column = columns.find((item) => item.key === state.sort.key);
+      if (!column) return records;
+      return records.map((record, index) => ({ record, index })).sort((left, right) => {
+        const leftMissing = isMissing(sortableValue(column, left.record));
+        const rightMissing = isMissing(sortableValue(column, right.record));
+        if (leftMissing || rightMissing) {
+          if (leftMissing && rightMissing) return left.index - right.index;
+          return leftMissing ? 1 : -1;
+        }
+        const result = sortCompare(column, left.record, right.record);
+        return result === 0 ? left.index - right.index : state.sort.direction === "asc" ? result : -result;
+      }).map((item) => item.record);
+    }
+
+    function renderBody() {
+      const filtered = getFilteredRecords();
+      const sorted = getSortedRecords(filtered);
+      state.filteredRecords = sorted;
+      const totalPages = Math.ceil(sorted.length / state.pageSize);
+      if (totalPages === 0) state.page = 1;
+      else if (state.page > totalPages) state.page = totalPages;
       const start = (state.page - 1) * state.pageSize;
-      const visibleRecords = records.slice(start, start + state.pageSize);
-      $("rows").innerHTML = visibleRecords.map((record) => `<tr>
-        <td class="sticky-col" title="${escapeHTML(record.part_number)}"><a class="part-number" href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">${escapeHTML(record.part_number)}</a></td>
-        <td>${formatValue(record.family)}</td><td>${formatValue(record.core)}</td><td>${formatValue(record.max_frequency_mhz)}</td>
-        <td>${formatValue(record.flash_kb)}</td><td>${formatValue(record.sram_kb)}</td><td>${formatVoltage(record)}</td><td>${formatTemperature(record)}</td>
-        <td title="${escapeHTML(record.package_variant || record.package)}">${formatValue(record.package_variant || record.package)}</td><td>${formatValue(record.pin_count)}</td><td>${formatValue(record.gpio_count)}</td>
-        <td>${formatValue(record.adc_channel_count, record.adc_resolution_bits ? ` / ${record.adc_resolution_bits} bit` : "")}</td><td>${formatValue(record.dac_channel_count)}</td><td>${formatValue(record.timer_count)}</td>
-        <td>${formatSerial(record)}</td><td>${formatValue(record.spi_count)}</td><td>${formatValue(record.i2c_count)}</td><td>${formatValue(record.can_count)}</td>
-        <td>${formatBoolean(record.usb)}</td><td>${formatBoolean(record.ethernet)}</td><td>${formatBoolean(record.sdio)}</td><td>${formatBoolean(record.qspi)}</td>
-        <td class="source-links"><a href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">产品页</a><a href="${safeURL(record.datasheet_url)}" target="_blank" rel="noreferrer">手册</a></td>
-      </tr>`).join("");
-      $("empty").hidden = records.length !== 0;
+      const visibleRecords = sorted.slice(start, start + state.pageSize);
+      $("rows").innerHTML = visibleRecords.map((record) => `<tr>${columns.map((column) => {
+        const cellClass = column.key === "spacer" ? "col-spacer" : column.key === "part_number" ? "col-part" : "";
+        if (column.key === "spacer") return `<td class="${cellClass}" aria-hidden="true"></td>`;
+        if (column.key === "part_number") return `<td class="${cellClass}" title="${escapeHTML(record.part_number)}"><a class="part-number" href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">${escapeHTML(record.part_number)}</a></td>`;
+        if (column.key === "source") return `<td class="${cellClass} source-links"><a href="${safeURL(record.product_url)}" target="_blank" rel="noreferrer">产品页</a><a href="${safeURL(record.datasheet_url)}" target="_blank" rel="noreferrer">手册</a></td>`;
+        return `<td class="${cellClass}" title="${escapeHTML(column.get(record) ?? "-")}">${displayCellValue(column, record)}</td>`;
+      }).join("")}</tr>`).join("");
+      $("empty").hidden = sorted.length !== 0;
+      renderPagination(totalPages);
+      const first = sorted.length ? start + 1 : 0;
+      const last = sorted.length ? Math.min(start + state.pageSize, sorted.length) : 0;
+      $("summary").textContent = `筛选结果 ${sorted.length} / ${state.catalog.length} 个型号`;
+      $("result-range").textContent = sorted.length ? `当前显示 ${first}-${last} 条，共 ${totalPages} 页` : "当前没有可显示的型号";
+      updateFilterIndicators();
+      updateSortIndicators();
     }
 
     function pageItems(totalPages) {
@@ -633,50 +404,37 @@
     }
 
     function renderPagination(totalPages) {
-      const pagination = $("pagination");
-      if (totalPages === 0) {
-        pagination.innerHTML = "";
-        return;
-      }
-      const items = [];
-      items.push(`<li><button class="page-button" type="button" data-page="${state.page - 1}" ${state.page === 1 ? "disabled" : ""}>上一页</button></li>`);
+      if (totalPages === 0) { $("pagination").innerHTML = ""; return; }
+      const items = [`<li><button class="page-button" type="button" data-page="${state.page - 1}" ${state.page === 1 ? "disabled" : ""}>上一页</button></li>`];
       for (const item of pageItems(totalPages)) {
-        if (typeof item === "string") items.push(`<li class="page-ellipsis" aria-hidden="true">...</li>`);
+        if (typeof item === "string") items.push('<li class="page-ellipsis" aria-hidden="true">...</li>');
         else items.push(`<li><button class="page-button" type="button" data-page="${item}" ${item === state.page ? 'aria-current="page"' : ""}>${item}</button></li>`);
       }
       items.push(`<li><button class="page-button" type="button" data-page="${state.page + 1}" ${state.page === totalPages ? "disabled" : ""}>下一页</button></li>`);
-      pagination.innerHTML = items.join("");
+      $("pagination").innerHTML = items.join("");
     }
 
-    function render() {
-      const records = getFilteredRecords();
-      state.filteredRecords = records;
-      const totalPages = Math.ceil(records.length / state.pageSize);
-      if (totalPages === 0) state.page = 1;
-      else if (state.page > totalPages) state.page = totalPages;
-      renderRows(records);
-      renderPagination(totalPages);
-      const start = records.length ? (state.page - 1) * state.pageSize + 1 : 0;
-      const end = records.length ? Math.min(state.page * state.pageSize, records.length) : 0;
-      $("summary").textContent = `筛选结果 ${records.length} / ${state.catalog.length} 个型号`;
-      $("result-range").textContent = records.length ? `当前显示 ${start}-${end} 条，共 ${totalPages} 页` : "当前没有可显示的型号";
+    function clearFilterInputs(details) {
+      details.querySelectorAll("input").forEach((input) => { input.checked = false; input.value = ""; });
+      details.querySelectorAll(".filter-option").forEach((option) => { option.hidden = false; });
+    }
+
+    function resetFilters() {
+      state.filters.clear();
+      state.textFilters.clear();
+      document.querySelectorAll("#filter-row details").forEach(clearFilterInputs);
+      state.page = 1;
+      renderBody();
     }
 
     function csvValue(value) {
-      const text = value === null || value === undefined ? "" : String(value);
+      const text = isMissing(value) ? "" : String(value);
       return `"${text.replace(/"/g, '""')}"`;
-    }
-
-    function exportValue(record, field) {
-      if (field === "voltage") return record.vdd_min_v === null || record.vdd_min_v === undefined || record.vdd_max_v === null || record.vdd_max_v === undefined ? "" : `${record.vdd_min_v}-${record.vdd_max_v}`;
-      if (field === "temperature") return record.temperature_min_c === null || record.temperature_min_c === undefined || record.temperature_max_c === null || record.temperature_max_c === undefined ? "" : `${record.temperature_min_c} to ${record.temperature_max_c}`;
-      if (field === "serial_count") return formatSerial(record).replace(/<[^>]+>/g, "");
-      return record[field] === null || record[field] === undefined ? "" : record[field];
     }
 
     function exportCSV() {
       const header = exportColumns.map(([label]) => csvValue(label)).join(",");
-      const lines = state.filteredRecords.map((record) => exportColumns.map(([, field]) => csvValue(exportValue(record, field))).join(","));
+      const lines = state.filteredRecords.map((record) => exportColumns.map(([, getValue]) => csvValue(getValue(record))).join(","));
       const blob = new Blob([`\ufeff${[header, ...lines].join("\n")}`], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -686,34 +444,71 @@
       URL.revokeObjectURL(url);
     }
 
-    function resetAndRender() {
+    $("filter-row").addEventListener("input", (event) => {
+      const input = event.target.closest("input[data-text-filter]");
+      if (!input) return;
+      state.textFilters.set(input.dataset.textFilter, input.value);
       state.page = 1;
-      render();
-    }
+      renderBody();
+    });
 
-    let filterTimer;
-    function scheduleRender() {
-      window.clearTimeout(filterTimer);
-      filterTimer = window.setTimeout(resetAndRender, 100);
-    }
+    $("filter-row").addEventListener("change", (event) => {
+      const input = event.target.closest('input[type="checkbox"][data-filter-key]');
+      if (!input) return;
+      const selected = state.filters.get(input.dataset.filterKey) || new Set();
+      if (input.checked) selected.add(input.value); else selected.delete(input.value);
+      state.filters.set(input.dataset.filterKey, selected);
+      state.page = 1;
+      renderBody();
+    });
+
+    $("filter-row").addEventListener("input", (event) => {
+      const input = event.target.closest(".filter-option-search");
+      if (!input) return;
+      const term = input.value.trim().toLowerCase();
+      input.closest(".filter-menu").querySelectorAll(".filter-option").forEach((label) => { label.hidden = term !== "" && !label.dataset.filterLabel.includes(term); });
+    });
+
+    $("filter-row").addEventListener("click", (event) => {
+      const action = event.target.closest("button[data-filter-action]");
+      if (!action) return;
+      const details = action.closest("details");
+      const key = details?.dataset.filterKey;
+      if (!key) return;
+      if (action.dataset.filterAction === "close") { details.open = false; return; }
+      if (action.dataset.filterAction === "clear") {
+        state.filters.delete(key);
+        state.textFilters.delete(key);
+        clearFilterInputs(details);
+      }
+      if (action.dataset.filterAction === "all") {
+        const column = columns.find((item) => item.key === key);
+        state.filters.set(key, new Set(filterTokens(column)));
+        syncFilterCheckboxes(details, key);
+      }
+      state.page = 1;
+      renderBody();
+    });
+
+    $("sort-row").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-sort-key]");
+      if (!button) return;
+      state.sort.key = button.dataset.sortKey;
+      state.sort.direction = button.dataset.sortDirection;
+      state.page = 1;
+      renderBody();
+    });
 
     $("pagination").addEventListener("click", (event) => {
       const button = event.target.closest("button[data-page]");
       if (!button || button.disabled) return;
       state.page = Number(button.dataset.page);
-      render();
+      renderBody();
       $("table-shell").scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
-    $("page-size").addEventListener("change", (event) => {
-      state.pageSize = Number(event.target.value);
-      state.page = 1;
-      render();
-    });
-    $("filter-form").addEventListener("submit", (event) => event.preventDefault());
-    $("filter-form").addEventListener("input", scheduleRender);
-    $("filter-form").addEventListener("change", resetAndRender);
-    $("reset-filters").addEventListener("click", () => window.setTimeout(resetAndRender, 0));
+    $("page-size").addEventListener("change", (event) => { state.pageSize = Number(event.target.value); state.page = 1; renderBody(); });
+    $("clear-filters").addEventListener("click", resetFilters);
     $("export-csv").addEventListener("click", exportCSV);
 
     Promise.all([
@@ -722,17 +517,13 @@
     ]).then(([catalog, metadata]) => {
       state.catalog = catalog.map((record) => ({
         ...record,
-        _searchText: [record.part_number, record.family, record.subfamily, record.description, record.manufacturer, record.core, record.package, record.package_variant]
-          .filter(Boolean).join(" ").toLowerCase()
+        _searchText: [record.part_number, record.family, record.subfamily, record.description, record.manufacturer, record.core, record.package, record.package_variant].filter(Boolean).join(" ").toLowerCase()
       }));
       state.metadata = metadata;
-      fillOptions("family", uniqueSorted(state.catalog, "family"));
-      fillOptions("subfamily", uniqueSorted(state.catalog, "subfamily"));
-      fillOptions("core", uniqueSorted(state.catalog, "core"));
-      fillOptions("package", uniqueSorted(state.catalog, "package"));
+      renderHeader();
       $("header-record-count").textContent = `${state.catalog.length} 个型号`;
       $("generated-at").textContent = `数据生成时间：${metadata.generated_at ? new Date(metadata.generated_at).toLocaleString("zh-CN") : "-"}`;
-      render();
+      renderBody();
     }).catch(() => {
       $("summary").textContent = "数据加载失败";
       $("load-error").hidden = false;
