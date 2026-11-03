@@ -144,6 +144,8 @@
         "trng": {"type": "boolean", "required": false},
         "product_url": {"type": "url", "required": true},
         "datasheet_url": {"type": "url", "required": true},
+        "sample_price": {"type": "string", "required": false, "description": "Sample price quote text, including currency and commercial conditions when known."},
+        "batch_price": {"type": "string", "required": false, "description": "Volume price quote text, including quantity, currency and commercial conditions when known."},
         "source_name": {"type": "string", "required": true},
         "source_checked_at": {"type": "date", "required": true, "format": "YYYY-MM-DD"},
         "last_modified_at": {"type": "date", "required": true, "format": "YYYY-MM-DD"},

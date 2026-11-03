@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MCU 参数在线选型表，支持表头筛选、排序、分页和 CSV 导出。">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2317344c'/%3E%3C/svg%3E">
-  <title>MCU 参数选型表</title>
+  <title>MCU 在线选型表</title>
   <style>
     :root {
       color-scheme: light;
@@ -116,8 +116,7 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="brand-line"><span class="brand-mark" aria-hidden="true">MCU</span><p class="eyebrow">在线参数目录</p></div>
-      <h1>MCU 参数选型表</h1>
-      <p class="header-meta"><span>STM32 / APM32 型号级参数</span><span>在线选型目录</span><span id="header-record-count">数据加载中...</span></p>
+      <h1>MCU 在线选型表</h1>
     </div>
   </header>
 
@@ -231,6 +230,8 @@
       booleanColumn("math_accelerator", "Math Accelerator"), booleanColumn("rf", "RF"), booleanColumn("trust_zone", "TrustZone"),
       booleanColumn("trng", "TRNG"), booleanColumn("rng", "RNG"), booleanColumn("otfdec", "OTFDEC"), booleanColumn("pka", "PKA"),
       booleanColumn("aes_des", "AES/DES"), booleanColumn("sha_hmac", "SHA/HMAC"), booleanColumn("bn_sm3_sm4", "BN/SM3/SM4"), booleanColumn("pdu", "PDU"),
+      { key: "sample_price", title: "样品价格", note: "样品报价文本", width: 112, kind: "text", valueType: "text", get: (record) => record.sample_price },
+      { key: "batch_price", title: "批量价格", note: "批量报价文本", width: 112, kind: "text", valueType: "text", get: (record) => record.batch_price },
       { key: "source", title: "来源", note: "官方链接", width: 136, kind: "none", sortable: false, get: () => null }
     ];
 
@@ -522,7 +523,6 @@
       }));
       state.metadata = metadata;
       renderHeader();
-      $("header-record-count").textContent = `${state.catalog.length} 个型号`;
       $("generated-at").textContent = `数据生成时间：${metadata.generated_at ? new Date(metadata.generated_at).toLocaleString("zh-CN") : "-"}`;
       renderBody();
     }).catch(() => {

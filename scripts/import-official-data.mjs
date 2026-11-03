@@ -303,6 +303,8 @@ function officialRecord(row, format, manufacturerId, sourceName, existingByPart)
     trng: booleanValue(source.trng),
     product_url: productUrl,
     datasheet_url: datasheetUrl,
+    sample_price: old?.sample_price || '',
+    batch_price: old?.batch_price || '',
     source_name: sourceName,
     source_checked_at: checkedAt,
     last_modified_at: checkedAt,
